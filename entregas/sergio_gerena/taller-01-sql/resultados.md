@@ -1,13 +1,16 @@
 # Ejercicio 1
 
-_¿Cuántas pistas hay en total en la base de datos?_
+__¿Cuántas pistas hay en total en la base de datos?__
+
 3503
 
-_¿Cuántos géneros distintos existen?_
+__¿Cuántos géneros distintos existen?__
+
 25
 
-_Obtén el nombre del género, el número de pistas y la duración promedio (en minutos) para cada género. Ordena de mayor a menor número de pistas._
-| # | nombre_genero | total_tracks | minutos_promedio |
+__Obtén el nombre del género, el número de pistas y la duración promedio (en minutos) para cada género. Ordena de mayor a menor número de pistas.__
+
+|   | nombre_genero | total_tracks | minutos_promedio |
 |----|---------------------|--------------|------------------|
 | 1 | Rock | 1297 | 4.73 |
 | 2 | Latin | 579 | 3.88 |
@@ -35,7 +38,7 @@ _Obtén el nombre del género, el número de pistas y la duración promedio (en 
 | 24 | Rock And Roll | 12 | 2.24 |
 | 25 | Opera | 1 | 2.91 |
 
-_¿Cuáles son las 5 pistas más largas? Muestra el nombre, el álbum y la duración en minutos._
+__¿Cuáles son las 5 pistas más largas? Muestra el nombre, el álbum y la duración en minutos.__
 | album | nombre_track | duracion_minutos |
 |-------------------------------------------|--------------------------------------|------------------|
 | Battlestar Galactica, Season 3 | Occupation / Precipice | 88 |
@@ -44,20 +47,23 @@ _¿Cuáles son las 5 pistas más largas? Muestra el nombre, el álbum y la durac
 | Battlestar Galactica (Classic), Season 1 | Battlestar Galactica, Pt. 2 | 49 |
 | Battlestar Galactica (Classic), Season 1 | The Man With Nine Lives | 49 |
 
-_¿Cuántas pistas tienen un UnitPrice superior a $0.99? ¿Qué porcentaje representan del total?_
+__¿Cuántas pistas tienen un UnitPrice superior a $0.99? ¿Qué porcentaje representan del total?__
+
 hay 213 pistas que superan ese precio, lo que representa el 6,08\% del total
 
-_Calcula la media, mínimo, máximo y varianza (en SQL) de la duración en milisegundos de todas las pistas._
+__Calcula la media, mínimo, máximo y varianza (en SQL) de la duración en milisegundos de todas las pistas.__
+
 | promedio | minimo | maximo | varianza |
 |----------|--------|--------|---------------|
 | 393599.2 | 1071 | 5286953| 286149105505 |
 
 # Ejercicio 2
 
-_¿Cuál es el total de ingresos generados por la tienda? ¿Y el promedio por factura?_
+__¿Cuál es el total de ingresos generados por la tienda? ¿Y el promedio por factura?__
+
 El total de ingresos generado por la tienda es de 2328.6, el promedio por factura es de 5.65
 
-_¿Cuántas facturas se emitieron por año? Ordena cronológicamente._
+__¿Cuántas facturas se emitieron por año? Ordena cronológicamente.__
 | año | facturas_totales |
 |------|------------------|
 | 2021 | 83 |
@@ -66,7 +72,7 @@ _¿Cuántas facturas se emitieron por año? Ordena cronológicamente._
 | 2024 | 83 |
 | 2025 | 80 |
 
-_Identifica los 5 países con más ingresos. Muestra: país, número de facturas, ingreso total y promedio por factura._
+__Identifica los 5 países con más ingresos. Muestra: país, número de facturas, ingreso total y promedio por factura.__
 | pais | ingreso_total | promedio_por_factura |
 |---------|--------------|----------------------|
 | USA | 523.06 | 5.75 |
@@ -75,10 +81,11 @@ _Identifica los 5 países con más ingresos. Muestra: país, número de facturas
 | Brazil | 190.10 | 5.43 |
 | Germany | 156.48 | 5.59 |
 
-_¿Cuál es la desviación estándar del total de facturas? Calcula primero la varianza en SQL y luego obtén la raíz en R o Python_
+__¿Cuál es la desviación estándar del total de facturas? Calcula primero la varianza en SQL y luego obtén la raíz en R o Python__
+
 4.74
 
-_Encuentra los meses con mayor y menor ingreso promedio._
+__Encuentra los meses con mayor y menor ingreso promedio.__
 | mes | promedio_mensual |
 |---------|------------------|
 | 2024-09 | 7.785 |
