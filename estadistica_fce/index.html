@@ -1,0 +1,1942 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Expedientes de Estadística FCE</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,700&family=Spectral:ital,wght@0,400;0,600;1,400&family=Archivo+Narrow:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: archivo de expedientes; cada caso es una carpeta con relato a la izquierda y mesa de trabajo (datos + prompts) a la derecha. */
+:root{
+  --papel:#f1f3f1; --hoja:#fbfcfb; --tinta:#17202b; --tenue:#5b6672; --linea:#cfd6d3;
+  --acento:#1d5c4a; --acento-suave:#dfeae5; --sello:#a3392c; --sello-suave:#f4e3df;
+  --f-display:"Bodoni Moda","Didot","Bodoni 72",Georgia,serif;
+  --f-texto:"Spectral",Georgia,"Times New Roman",serif;
+  --f-etiq:"Archivo Narrow","Arial Narrow",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --papel:#121815; --hoja:#19211d; --tinta:#e6ebe8; --tenue:#9aa6a0; --linea:#2f3a35;
+  --acento:#7cc4a6; --acento-suave:#1f3329; --sello:#e48a7c; --sello-suave:#3a2420; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --papel:#121815; --hoja:#19211d; --tinta:#e6ebe8; --tenue:#9aa6a0; --linea:#2f3a35;
+  --acento:#7cc4a6; --acento-suave:#1f3329; --sello:#e48a7c; --sello-suave:#3a2420; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--papel);color:var(--tinta);font:17px/1.6 var(--f-texto);margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+a{color:var(--acento)}
+a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--acento);outline-offset:2px}
+code{font-family:var(--f-mono);font-size:.84em}
+
+.top{padding-block:56px 28px;border-bottom:1px solid var(--linea)}
+.kicker{font:600 .8rem/1 var(--f-etiq);letter-spacing:.14em;text-transform:uppercase;color:var(--tenue);margin:0 0 18px}
+h1{font:700 clamp(2.4rem,6vw,4.4rem)/1.02 var(--f-display);margin:0;max-width:16ch;text-wrap:balance;letter-spacing:-.01em}
+h1 em{font-style:normal;color:var(--sello)}
+.intro{max-width:62ch;color:var(--tenue);margin:20px 0 0}
+.intro b{color:var(--tinta);font-weight:600}
+.cifras{display:flex;flex-wrap:wrap;gap:8px 28px;margin:22px 0 0;font:500 .9rem var(--f-etiq);color:var(--tenue);letter-spacing:.04em}
+.cifras span b{font:500 1rem var(--f-mono);color:var(--tinta)}
+
+.barra{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--papel);border-bottom:1px solid var(--linea)}
+.barra .wrap{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;padding-block:12px}
+.grupo{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.grupo .lbl{font:600 .72rem var(--f-etiq);letter-spacing:.12em;text-transform:uppercase;color:var(--tenue);margin-right:4px}
+.chip,.lang{font:500 .86rem/1 var(--f-etiq);border:1px solid var(--linea);background:var(--hoja);color:var(--tinta);padding:8px 11px;border-radius:999px;cursor:pointer}
+.chip[aria-pressed="true"],.lang[aria-pressed="true"]{background:var(--acento);border-color:var(--acento);color:var(--hoja)}
+.sep{flex:1}
+@media (max-width:600px){.barra{position:static}}
+
+main{padding-block:28px 72px;display:grid;gap:28px}
+.caso{background:var(--hoja);border:1px solid var(--linea);border-radius:4px;padding:28px clamp(18px,3vw,36px) 30px;position:relative}
+.caso::before{content:"";position:absolute;left:-1px;top:-1px;width:120px;height:4px;background:var(--acento)}
+.exp{font:600 .76rem var(--f-etiq);letter-spacing:.12em;text-transform:uppercase;color:var(--sello);margin:0}
+.caso h2{font:700 clamp(1.6rem,3.2vw,2.3rem)/1.12 var(--f-display);margin:8px 0 6px;text-wrap:balance}
+.sub{font:500 .9rem var(--f-etiq);color:var(--tenue);margin:0;letter-spacing:.02em}
+.cols{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:32px;margin-top:22px}
+@media (max-width:860px){.cols{grid-template-columns:minmax(0,1fr);gap:20px}}
+.relato p{margin:0 0 14px;max-width:62ch}
+.leccion{border-left:3px solid var(--sello);padding:2px 0 2px 14px;color:var(--tinta)}
+.leccion b{font-weight:600}
+.trabajo{min-width:0;display:flex;flex-direction:column;gap:12px}
+.trabajo h3,.pensar h3{font:600 .78rem var(--f-etiq);letter-spacing:.13em;text-transform:uppercase;color:var(--tenue);margin:6px 0 0}
+
+.ficha{border:1px solid var(--linea);border-radius:3px;background:var(--papel)}
+.ficha summary{cursor:pointer;list-style:none;display:flex;flex-wrap:wrap;gap:4px 12px;justify-content:space-between;align-items:baseline;padding:10px 12px}
+.ficha summary::-webkit-details-marker{display:none}
+.ficha summary .file{min-width:0;overflow-wrap:anywhere;color:var(--acento);font-weight:500}
+.ficha summary .file::before{content:"▸ ";color:var(--tenue)}
+.ficha[open] summary .file::before{content:"▾ "}
+.ficha summary .meta{font:500 .82rem var(--f-etiq);color:var(--tenue);font-variant-numeric:tabular-nums}
+.ficha-body{padding:0 12px 14px;border-top:1px solid var(--linea)}
+.ficha h4{font:600 1rem var(--f-texto);margin:12px 0 8px}
+dl{margin:0 0 10px;display:grid;gap:4px}
+dl div{display:grid;grid-template-columns:5.5rem minmax(0,1fr);gap:8px}
+dt{font:600 .76rem var(--f-etiq);letter-spacing:.08em;text-transform:uppercase;color:var(--tenue);padding-top:3px}
+dd{margin:0;font-size:.92rem}
+.tw{overflow-x:auto;margin:8px 0}
+table{border-collapse:collapse;width:100%;font-size:.86rem}
+th{font:600 .74rem var(--f-etiq);letter-spacing:.08em;text-transform:uppercase;color:var(--tenue);text-align:left;border-bottom:1px solid var(--linea);padding:6px 8px}
+td{border-bottom:1px solid var(--linea);padding:6px 8px;vertical-align:top}
+td code{white-space:nowrap}
+td.esc{font:500 .8rem var(--f-etiq);color:var(--acento);white-space:nowrap}
+.adv{background:var(--sello-suave);padding:8px 10px;border-radius:3px;font-size:.88rem;margin:10px 0}
+.adv b{color:var(--sello)}
+.abrir{font:600 .84rem var(--f-etiq);letter-spacing:.04em}
+.sin-datos{font-size:.92rem;color:var(--tenue);margin:0;border:1px dashed var(--linea);padding:10px 12px;border-radius:3px}
+
+.prompts{list-style:none;counter-reset:p;margin:0;padding:0;display:grid;gap:10px}
+.prompts li{counter-increment:p;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:start;background:var(--acento-suave);border-radius:3px;padding:10px 10px 10px 12px}
+.prompts li::before{content:counter(p);font:500 .8rem var(--f-mono);color:var(--acento);padding-top:3px}
+.prompt{font-size:.92rem;line-height:1.5;min-width:0;overflow-wrap:anywhere}
+.prompt mark{background:none;color:var(--acento);font-weight:600}
+.copiar{font:600 .76rem var(--f-etiq);letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--acento);color:var(--acento);background:var(--hoja);border-radius:3px;padding:6px 9px;cursor:pointer}
+.copiar.ok{background:var(--acento);color:var(--hoja)}
+.pensar{border-top:1px solid var(--linea);padding-top:4px}
+.pensar p{margin:6px 0 0;font-style:italic;font-size:.95rem}
+
+.autor{font:500 1rem var(--f-etiq);letter-spacing:.03em;color:var(--tenue);margin:14px 0 0}
+.autor b{color:var(--tinta);font-weight:600}
+.intro p{margin:0 0 12px}
+.como{background:var(--hoja);border:1px solid var(--linea);border-radius:4px;padding:20px clamp(18px,3vw,36px)}
+.como h2{font:700 1.4rem/1.2 var(--f-display);margin:0 0 10px}
+.como ol{margin:0;padding-left:1.3em;display:grid;gap:6px;max-width:80ch}
+.codigo{border:1px solid var(--linea);border-radius:3px;background:var(--papel);min-width:0}
+.cbar{display:flex;flex-wrap:wrap;gap:6px 10px;justify-content:space-between;align-items:center;padding:8px 10px;border-bottom:1px solid var(--linea)}
+.cbar > code{color:var(--tenue);overflow-wrap:anywhere;min-width:0}
+.cbar span{display:flex;gap:10px;align-items:center;font:600 .82rem var(--f-etiq)}
+.codigo pre{margin:0;padding:12px 14px;max-height:460px;overflow:auto;font:400 .78rem/1.55 var(--f-mono);tab-size:4}
+.codigo pre code{font-size:1em}
+.cm{color:var(--acento)}
+.relato .pensar{margin-top:18px}
+.vacio{text-align:center;color:var(--tenue)}
+footer{border-top:1px solid var(--linea);padding-block:24px 48px;color:var(--tenue);font-size:.9rem}
+footer p{max-width:70ch;margin:0 0 8px}
+@media (prefers-reduced-motion:no-preference){.copiar{transition:background .15s}}
+</style>
+
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <p class="kicker">Probabilidad y Estadística Fundamental · Facultad de Ciencias Económicas</p>
+  <h1>Estadística con <em>casos reales</em></h1>
+  <p class="autor">Material preparado por <b>Sebastián Tabares</b></p>
+  <div class="intro">
+    <p>En 2013 un estudiante de doctorado encontró un error de Excel en un estudio de economía que se había usado para defender recortes en Europa y Estados Unidos. Años antes, un analista había usado una desviación estándar para mostrar que el fondo de Bernie Madoff era un fraude. Los doce casos de esta página pasaron de verdad, y todos se resuelven con lo que se ve en el primer parcial: tablas de frecuencia, medidas de centro y dispersión, correlación, conteo y probabilidad condicional.</p>
+    <p>Cada caso trae los datos originales, o los más cercanos que son públicos, y un script en R y otro en Python listos para correr. Ejecútalos, cambia lo que quieras y al final responde la pregunta del caso con tus propias palabras.</p>
+  </div>
+  <div class="cifras"><span><b>12</b> casos</span><span><b>12</b> conjuntos de datos</span><span><b>24</b> scripts</span><span>Temas 1 a 4.6 del programa</span></div>
+</div></header>
+
+<nav class="barra" aria-label="Filtros"><div class="wrap">
+  <div class="grupo" role="group" aria-label="Filtrar por tema"><span class="lbl">Tema</span><button type="button" class="chip" data-t="t1" aria-pressed="false">1 · Variables y escalas</button><button type="button" class="chip" data-t="t2" aria-pressed="false">2 · Una variable</button><button type="button" class="chip" data-t="t3" aria-pressed="false">3 · Dos variables y correlación</button><button type="button" class="chip" data-t="t4" aria-pressed="false">4 · Probabilidad y Bayes</button></div>
+  <span class="sep"></span>
+  <div class="grupo" role="group" aria-label="Lenguaje de los scripts"><span class="lbl">Código en</span>
+    <button type="button" class="lang" data-lang="r" aria-pressed="true">R</button>
+    <button type="button" class="lang" data-lang="py" aria-pressed="false">Python</button>
+  </div>
+</div></nav>
+
+<main class="wrap">
+<section class="como">
+  <h2>Cómo correr los scripts</h2>
+  <ol>
+    <li><b>Descarga el material.</b> En el repositorio <a href="https://github.com/setase-24/Sebastian_Tabares/tree/main/estadistica_fce" target="_blank" rel="noopener">setase-24/Sebastian_Tabares</a>, botón <i>Code → Download ZIP</i>, y abre la carpeta <code>estadistica_fce</code>.</li>
+    <li><b>En R:</b> abre el script en RStudio, fija como directorio de trabajo la carpeta <code>estadistica_fce</code> (<i>Session → Set Working Directory</i>) y corre con <code>Ctrl + Shift + Enter</code>. Necesitas <code>install.packages(c("dplyr", "ggplot2"))</code>.</li>
+    <li><b>En Python:</b> desde la carpeta <code>estadistica_fce</code>, corre <code>python scripts/python/01_literary_digest.py</code>. Necesitas <code>pip install pandas matplotlib</code>.</li>
+    <li><b>Sin instalar nada:</b> copia el script en Google Colab o en Posit Cloud. Si no encuentra la carpeta <code>datos/</code>, lo descarga solo desde GitHub.</li>
+  </ol>
+</section>
+
+<article class="caso" id="literary-digest" data-temas="t1 t4">
+  <header>
+    <p class="exp">Expediente 01 · Estados Unidos, 1936</p>
+    <h2>La encuesta más grande que falló</h2>
+    <p class="sub">1.1 población y muestra · 4.3 probabilidad frecuentista</p>
+  </header>
+  <div class="cols">
+    <div class="relato">
+      <p>La revista Literary Digest envió unos 10 millones de papeletas y recibió cerca de 2,4 millones. Con eso predijo que Alf Landon le ganaría a Franklin D. Roosevelt. Roosevelt ganó con el 61 % del voto y se llevó 46 de los 48 estados. Las direcciones salieron de directorios telefónicos, registros de autos y listas de suscriptores: en plena Gran Depresión, eso era una muestra de gente con más dinero que el promedio, y además solo respondió quien quiso.</p>
+      <p class="leccion"><b>Lo que enseña.</b> Una muestra enorme pero sesgada no se arregla con más datos. Lo mismo pasa hoy con datos obtenidos por scraping: son lo que la página deja ver, no la población.</p>
+      <div class="pensar"><h3>Para pensar</h3><p>Roosevelt sacó el 61 % real. ¿Por qué 2,4 millones de respuestas no bastaron? ¿Qué parte del error viene de a quién se le envió la papeleta y qué parte de quién decidió responder?</p></div>
+    </div>
+    <div class="trabajo">
+      <h3>Datos</h3>
+      
+<details class="ficha">
+  <summary><span class="file"><code>datos/literary_digest_1936.csv</code></span><span class="meta">49 (48 estados + «Other») · 1 KB</span></summary>
+  <div class="ficha-body">
+    <h4>Sondeo del Literary Digest, 1936</h4>
+    <dl>
+      <div><dt>Periodo</dt><dd>Octubre de 1936</dd></div>
+      <div><dt>Fuente</dt><dd>The Literary Digest, 31 de octubre de 1936; transcrito por Kyle Siegrist, Random Services (Universidad de Alabama en Huntsville). <a href="https://randomservices.org/random/data/LiteraryDigest.html" target="_blank" rel="noopener">Ver original</a></dd></div>
+      <div><dt>Licencia</dt><dd>Dato histórico de dominio público; transcripción de uso educativo</dd></div>
+    </dl>
+    <div class="tw"><table><thead><tr><th>Columna</th><th>Qué es</th><th>Escala</th></tr></thead><tbody><tr><td><code>estado</code></td><td>Abreviatura postal del estado</td><td class='esc'>Nominal</td></tr><tr><td><code>votos_electorales</code></td><td>Votos en el colegio electoral (1936)</td><td class='esc'>Razón (discreta)</td></tr><tr><td><code>sondeo_landon</code></td><td>Papeletas recibidas a favor de Landon</td><td class='esc'>Razón (discreta)</td></tr><tr><td><code>sondeo_roosevelt</code></td><td>Papeletas recibidas a favor de Roosevelt</td><td class='esc'>Razón (discreta)</td></tr></tbody></table></div>
+    <p class='adv'><b>Ojo con los datos.</b> La transcripción tiene errores probables: CA y AR repiten 7.608 para Roosevelt; ME repite exactamente la fila de LA; NH figura con 16 votos electorales (eran 4). Sirven como ejercicio de detección. Los totales suman 2,15 millones, menos que los 2,37 millones publicados.</p>
+    <a class="abrir" href="datos/literary_digest_1936.csv" target="_blank" rel="noopener">Abrir el CSV</a>
+  </div>
+</details>
+      <h3>Script</h3>
+      <div class="codigo" data-lang="r">
+        <div class="cbar"><code>scripts/r/01_literary_digest.R</code><span><a href="https://github.com/setase-24/Sebastian_Tabares/blob/main/estadistica_fce/scripts/r/01_literary_digest.R" target="_blank" rel="noopener">Ver en GitHub</a><button type="button" class="copiar">Copiar</button></span></div>
+        <pre><code><span class="cm"># Expediente 01: La encuesta más grande que falló</span>
+<span class="cm"># Estados Unidos, 1936</span>
+<span class="cm"># Temas: 1.1 población y muestra · 4.3 probabilidad frecuentista</span>
+<span class="cm">#</span>
+<span class="cm"># Material de apoyo de Probabilidad y Estadística Fundamental (FCE).</span>
+<span class="cm"># Autor: Sebastián Tabares</span>
+<span class="cm"># Datos: literary_digest_1936.csv</span>
+<span class="cm"># Paquetes: install.packages(c(&quot;dplyr&quot;, &quot;ggplot2&quot;))</span>
+
+library(dplyr)
+library(ggplot2)
+
+URL_DATOS &lt;- &quot;https://raw.githubusercontent.com/setase-24/Sebastian_Tabares/main/estadistica_fce/datos/&quot;
+
+<span class="cm"># Lee el CSV desde la carpeta datos/ si existe; si no, lo descarga de GitHub.</span>
+leer &lt;- function(archivo) {
+  for (ruta in c(&quot;datos&quot;, &quot;../datos&quot;, &quot;../../datos&quot;)) {
+    f &lt;- file.path(ruta, archivo)
+    if (file.exists(f)) return(read.csv(f))
+  }
+  read.csv(paste0(URL_DATOS, archivo))
+}
+
+ld &lt;- leer(&quot;literary_digest_1936.csv&quot;)
+
+<span class="cm"># 1. Porcentaje de Landon por estado y en total</span>
+ld &lt;- ld |&gt; mutate(pct_landon = 100 * sondeo_landon / (sondeo_landon + sondeo_roosevelt))
+total_l &lt;- sum(ld$sondeo_landon); total_r &lt;- sum(ld$sondeo_roosevelt)
+cat(&quot;Papeletas en la tabla:&quot;, format(total_l + total_r, big.mark = &quot;,&quot;), &quot;\n&quot;)
+cat(sprintf(&quot;Landon según el sondeo: %.1f %%\n&quot;, 100 * total_l / (total_l + total_r)))
+cat(&quot;Resultado real de la elección: Roosevelt 60,8 %, Landon 36,5 %\n&quot;)
+
+estados &lt;- ld |&gt; filter(estado != &quot;Other&quot;)
+cat(&quot;Estados donde el sondeo daba ganador a Landon:&quot;, sum(estados$pct_landon &gt; 50), &quot;de&quot;, nrow(estados), &quot;\n&quot;)
+cat(&quot;En la elección real Landon ganó solo 2: Maine y Vermont.\n&quot;)
+
+<span class="cm"># 2. Buscar filas sospechosas</span>
+cat(&quot;\nVotos de Roosevelt repetidos en estados distintos:\n&quot;)
+print(ld |&gt; group_by(sondeo_roosevelt) |&gt; filter(n() &gt; 1) |&gt; ungroup())
+cat(&quot;\nFilas con los mismos votos de Landon y Roosevelt:\n&quot;)
+print(ld |&gt; group_by(sondeo_landon, sondeo_roosevelt) |&gt; filter(n() &gt; 1) |&gt; ungroup())
+cat(&quot;\nSuma de votos electorales:&quot;, sum(ld$votos_electorales), &quot;(debería ser 531)\n&quot;)
+
+<span class="cm"># 3. Gráfica: porcentaje de Landon por estado</span>
+g &lt;- ggplot(estados, aes(x = pct_landon, y = reorder(estado, pct_landon))) +
+  geom_col(fill = &quot;#1d5c4a&quot;) +
+  geom_vline(xintercept = 50, linetype = &quot;dashed&quot;, color = &quot;#a3392c&quot;) +
+  labs(x = &quot;% de papeletas a favor de Landon&quot;, y = NULL,
+       title = &quot;Literary Digest 1936: lo que decía el sondeo&quot;) +
+  theme_minimal()
+print(g)
+
+<span class="cm"># Para pensar: Roosevelt sacó el 61 % real. ¿Por qué 2,4 millones de respuestas no bastaron? ¿Qué parte del error viene de a quién se le envió la papeleta y qué parte de quién decidió responder?</span>
+</code></pre></div><div class="codigo" data-lang="py" hidden>
+        <div class="cbar"><code>scripts/python/01_literary_digest.py</code><span><a href="https://github.com/setase-24/Sebastian_Tabares/blob/main/estadistica_fce/scripts/python/01_literary_digest.py" target="_blank" rel="noopener">Ver en GitHub</a><button type="button" class="copiar">Copiar</button></span></div>
+        <pre><code>&quot;&quot;&quot;
+Expediente 01: La encuesta más grande que falló
+Estados Unidos, 1936
+Temas: 1.1 población y muestra · 4.3 probabilidad frecuentista
+
+Material de apoyo de Probabilidad y Estadística Fundamental (FCE).
+Autor: Sebastián Tabares
+Datos: literary_digest_1936.csv
+&quot;&quot;&quot;
+import os
+import pandas as pd
+
+URL_DATOS = &quot;https://raw.githubusercontent.com/setase-24/Sebastian_Tabares/main/estadistica_fce/datos/&quot;
+
+def leer(archivo):
+    &quot;&quot;&quot;Lee el CSV desde la carpeta datos/ si existe; si no, lo descarga de GitHub.&quot;&quot;&quot;
+    for ruta in (&quot;datos&quot;, &quot;../datos&quot;, &quot;../../datos&quot;):
+        if os.path.exists(os.path.join(ruta, archivo)):
+            return pd.read_csv(os.path.join(ruta, archivo))
+    return pd.read_csv(URL_DATOS + archivo)
+
+import matplotlib.pyplot as plt
+
+ld = leer(&quot;literary_digest_1936.csv&quot;)
+
+<span class="cm"># 1. Porcentaje de Landon por estado y en total</span>
+ld[&quot;pct_landon&quot;] = 100 * ld[&quot;sondeo_landon&quot;] / (ld[&quot;sondeo_landon&quot;] + ld[&quot;sondeo_roosevelt&quot;])
+total_landon = ld[&quot;sondeo_landon&quot;].sum()
+total_fdr = ld[&quot;sondeo_roosevelt&quot;].sum()
+print(f&quot;Papeletas en la tabla: {total_landon + total_fdr:,}&quot;)
+print(f&quot;Landon según el sondeo: {100 * total_landon / (total_landon + total_fdr):.1f} %&quot;)
+print(&quot;Resultado real de la elección: Roosevelt 60,8 %, Landon 36,5 %&quot;)
+
+estados = ld[ld[&quot;estado&quot;] != &quot;Other&quot;]
+print(f&quot;Estados donde el sondeo daba ganador a Landon: {(estados[&#x27;pct_landon&#x27;] &gt; 50).sum()} de {len(estados)}&quot;)
+print(&quot;En la elección real Landon ganó solo 2: Maine y Vermont.&quot;)
+
+<span class="cm"># 2. Buscar filas sospechosas</span>
+print(&quot;\nVotos de Roosevelt repetidos en estados distintos:&quot;)
+print(ld[ld.duplicated(&quot;sondeo_roosevelt&quot;, keep=False)].sort_values(&quot;sondeo_roosevelt&quot;))
+print(&quot;\nFilas con los mismos votos de Landon y Roosevelt:&quot;)
+print(ld[ld.duplicated([&quot;sondeo_landon&quot;, &quot;sondeo_roosevelt&quot;], keep=False)])
+print(f&quot;\nSuma de votos electorales: {ld[&#x27;votos_electorales&#x27;].sum()} (debería ser 531)&quot;)
+
+<span class="cm"># 3. Gráfica: porcentaje de Landon por estado</span>
+orden = estados.sort_values(&quot;pct_landon&quot;)
+plt.figure(figsize=(7, 10))
+plt.barh(orden[&quot;estado&quot;], orden[&quot;pct_landon&quot;], color=&quot;#1d5c4a&quot;)
+plt.axvline(50, color=&quot;#a3392c&quot;, linestyle=&quot;--&quot;)
+plt.xlabel(&quot;% de papeletas a favor de Landon&quot;)
+plt.title(&quot;Literary Digest 1936: lo que decía el sondeo&quot;)
+plt.tight_layout()
+plt.show()
+
+<span class="cm"># Para pensar: Roosevelt sacó el 61 % real. ¿Por qué 2,4 millones de respuestas no bastaron? ¿Qué parte del error viene de a quién se le envió la papeleta y qué parte de quién decidió responder?</span>
+</code></pre></div>
+    </div>
+  </div>
+</article>
+<article class="caso" id="reinhart-rogoff" data-temas="t2">
+  <header>
+    <p class="exp">Expediente 02 · Harvard y UMass Amherst, 2010–2013</p>
+    <h2>El error de Excel que justificó la austeridad</h2>
+    <p class="sub">2.2 media, mediana y media ponderada · 2.3 datos atípicos</p>
+  </header>
+  <div class="cols">
+    <div class="relato">
+      <p>En 2010 Carmen Reinhart y Kenneth Rogoff publicaron que los países con deuda pública mayor al 90 % del PIB crecían en promedio −0,1 % al año. El dato se citó en Europa y Estados Unidos para defender recortes. En 2013 Thomas Herndon, estudiante de doctorado, no pudo replicarlo. Al pedir la hoja de cálculo encontró que un rango mal seleccionado dejaba por fuera a cinco países, que se excluían años sin explicación y que cada país pesaba igual sin importar cuántos años aportaba.</p>
+      <p class="leccion"><b>Lo que enseña.</b> La forma de promediar cambia la conclusión. Un script que cualquiera puede volver a correr habría mostrado el error de inmediato; una celda de Excel lo escondió durante tres años.</p>
+      <div class="pensar"><h3>Para pensar</h3><p>En la versión publicada, Nueva Zelanda aportaba un solo año a la categoría &gt;90% (1951, con crecimiento de −7,6 %) y el Reino Unido aportaba 19. Con promedios por país, ese único año pesa lo mismo que los 19 británicos. ¿Es justo? ¿Qué pregunta responde cada forma de promediar?</p></div>
+    </div>
+    <div class="trabajo">
+      <h3>Datos</h3>
+      
+<details class="ficha">
+  <summary><span class="file"><code>datos/reinhart_rogoff_1946_2009.csv</code></span><span class="meta">1.175 país-año · 37 KB</span></summary>
+  <div class="ficha-body">
+    <h4>Deuda pública y crecimiento, 20 países avanzados</h4>
+    <dl>
+      <div><dt>Periodo</dt><dd>1946–2009</dd></div>
+      <div><dt>Fuente</dt><dd>Hoja de trabajo original de Reinhart y Rogoff, procesada por Herndon, Ash y Pollin (2013), archivo RR-processed.dta. <a href="https://zenodo.org/records/4017423" target="_blank" rel="noopener">Ver original</a></dd></div>
+      <div><dt>Licencia</dt><dd>Código BSD-2; depósito en Zenodo con AGPL-3.0. Uso académico con cita</dd></div>
+    </dl>
+    <div class="tw"><table><thead><tr><th>Columna</th><th>Qué es</th><th>Escala</th></tr></thead><tbody><tr><td><code>pais</code></td><td>País</td><td class='esc'>Nominal</td></tr><tr><td><code>anio</code></td><td>Año</td><td class='esc'>Intervalo</td></tr><tr><td><code>deuda_pib_pct</code></td><td>Deuda pública bruta como % del PIB</td><td class='esc'>Razón</td></tr><tr><td><code>crecimiento_pib_real_pct</code></td><td>Crecimiento del PIB real (%)</td><td class='esc'>Intervalo</td></tr><tr><td><code>categoria_deuda</code></td><td>Tramo de deuda: 0-30%, 30-60%, 60-90%, &gt;90%</td><td class='esc'>Ordinal</td></tr></tbody></table></div>
+    <p class='adv'><b>Ojo con los datos.</b> Incluye todos los país-año con datos de deuda y crecimiento. Italia entra desde 1951, como en la réplica. Bélgica 1947 tiene un crecimiento muy alto que distorsiona medias.</p>
+    <a class="abrir" href="datos/reinhart_rogoff_1946_2009.csv" target="_blank" rel="noopener">Abrir el CSV</a>
+  </div>
+</details>
+      <h3>Script</h3>
+      <div class="codigo" data-lang="r">
+        <div class="cbar"><code>scripts/r/02_reinhart_rogoff.R</code><span><a href="https://github.com/setase-24/Sebastian_Tabares/blob/main/estadistica_fce/scripts/r/02_reinhart_rogoff.R" target="_blank" rel="noopener">Ver en GitHub</a><button type="button" class="copiar">Copiar</button></span></div>
+        <pre><code><span class="cm"># Expediente 02: El error de Excel que justificó la austeridad</span>
+<span class="cm"># Harvard y UMass Amherst, 2010–2013</span>
+<span class="cm"># Temas: 2.2 media, mediana y media ponderada · 2.3 datos atípicos</span>
+<span class="cm">#</span>
+<span class="cm"># Material de apoyo de Probabilidad y Estadística Fundamental (FCE).</span>
+<span class="cm"># Autor: Sebastián Tabares</span>
+<span class="cm"># Datos: reinhart_rogoff_1946_2009.csv</span>
+<span class="cm"># Paquetes: install.packages(c(&quot;dplyr&quot;, &quot;ggplot2&quot;))</span>
+
+library(dplyr)
+library(ggplot2)
+
+URL_DATOS &lt;- &quot;https://raw.githubusercontent.com/setase-24/Sebastian_Tabares/main/estadistica_fce/datos/&quot;
+
+<span class="cm"># Lee el CSV desde la carpeta datos/ si existe; si no, lo descarga de GitHub.</span>
+leer &lt;- function(archivo) {
+  for (ruta in c(&quot;datos&quot;, &quot;../datos&quot;, &quot;../../datos&quot;)) {
+    f &lt;- file.path(ruta, archivo)
+    if (file.exists(f)) return(read.csv(f))
+  }
+  read.csv(paste0(URL_DATOS, archivo))
+}
+
+rr &lt;- leer(&quot;reinhart_rogoff_1946_2009.csv&quot;) |&gt;
+  mutate(categoria_deuda = factor(categoria_deuda, levels = c(&quot;0-30%&quot;, &quot;30-60%&quot;, &quot;60-90%&quot;, &quot;&gt;90%&quot;)))
+
+<span class="cm"># 1. Cada país-año pesa lo mismo</span>
+cat(&quot;Media y mediana con todos los país-año:\n&quot;)
+print(rr |&gt; group_by(categoria_deuda) |&gt;
+        summarise(media = mean(crecimiento_pib_real_pct), mediana = median(crecimiento_pib_real_pct), n = n()))
+
+<span class="cm"># 2. Cada país pesa lo mismo (promedio de promedios), como hicieron Reinhart y Rogoff</span>
+promedio_por_pais &lt;- function(df) {
+  df |&gt; group_by(categoria_deuda, pais) |&gt; summarise(m = mean(crecimiento_pib_real_pct), .groups = &quot;drop&quot;) |&gt;
+    group_by(categoria_deuda) |&gt; summarise(m = mean(m))
+}
+excluidos &lt;- c(&quot;Australia&quot;, &quot;Austria&quot;, &quot;Belgium&quot;, &quot;Canada&quot;, &quot;Denmark&quot;)
+tabla &lt;- rr |&gt; group_by(categoria_deuda) |&gt; summarise(pais_anio = mean(crecimiento_pib_real_pct)) |&gt;
+  left_join(promedio_por_pais(rr) |&gt; rename(promedio_por_pais = m), by = &quot;categoria_deuda&quot;) |&gt;
+  left_join(promedio_por_pais(filter(rr, !pais %in% excluidos)) |&gt; rename(con_error_excel = m), by = &quot;categoria_deuda&quot;)
+cat(&quot;\nTres formas de promediar el crecimiento (%):\n&quot;)
+print(tabla |&gt; mutate(across(where(is.numeric), \(x) round(x, 2))))
+cat(&quot;Reinhart y Rogoff publicaron -0,1 % para &gt;90%. Además del error de Excel, excluyeron años de Nueva Zelanda, Australia y Canadá.\n&quot;)
+
+<span class="cm"># 3. Atípicos en la categoría &gt;90%</span>
+alta &lt;- rr |&gt; filter(categoria_deuda == &quot;&gt;90%&quot;)
+cat(&quot;\nAños que aporta cada país a la categoría &gt;90%:\n&quot;)
+print(sort(table(alta$pais), decreasing = TRUE))
+g &lt;- ggplot(alta, aes(x = pais, y = crecimiento_pib_real_pct)) +
+  geom_boxplot(fill = &quot;#dfeae5&quot;) +
+  geom_hline(yintercept = 0, color = &quot;gray50&quot;) +
+  labs(x = NULL, y = &quot;Crecimiento del PIB real (%)&quot;, title = &quot;Países con deuda &gt; 90 % del PIB&quot;) +
+  theme_minimal() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+print(g)
+
+<span class="cm"># Para pensar: En la versión publicada, Nueva Zelanda aportaba un solo año a la categoría &gt;90% (1951, con crecimiento de −7,6 %) y el Reino Unido aportaba 19. Con promedios por país, ese único año pesa lo mismo que los 19 británicos. ¿Es justo? ¿Qué pregunta responde cada forma de promediar?</span>
+</code></pre></div><div class="codigo" data-lang="py" hidden>
+        <div class="cbar"><code>scripts/python/02_reinhart_rogoff.py</code><span><a href="https://github.com/setase-24/Sebastian_Tabares/blob/main/estadistica_fce/scripts/python/02_reinhart_rogoff.py" target="_blank" rel="noopener">Ver en GitHub</a><button type="button" class="copiar">Copiar</button></span></div>
+        <pre><code>&quot;&quot;&quot;
+Expediente 02: El error de Excel que justificó la austeridad
+Harvard y UMass Amherst, 2010–2013
+Temas: 2.2 media, mediana y media ponderada · 2.3 datos atípicos
+
+Material de apoyo de Probabilidad y Estadística Fundamental (FCE).
+Autor: Sebastián Tabares
+Datos: reinhart_rogoff_1946_2009.csv
+&quot;&quot;&quot;
+import os
+import pandas as pd
+
+URL_DATOS = &quot;https://raw.githubusercontent.com/setase-24/Sebastian_Tabares/main/estadistica_fce/datos/&quot;
+
+def leer(archivo):
+    &quot;&quot;&quot;Lee el CSV desde la carpeta datos/ si existe; si no, lo descarga de GitHub.&quot;&quot;&quot;
+    for ruta in (&quot;datos&quot;, &quot;../datos&quot;, &quot;../../datos&quot;):
+        if os.path.exists(os.path.join(ruta, archivo)):
+            return pd.read_csv(os.path.join(ruta, archivo))
+    return pd.read_csv(URL_DATOS + archivo)
+
+import matplotlib.pyplot as plt
+
+rr = leer(&quot;reinhart_rogoff_1946_2009.csv&quot;)
+orden = [&quot;0-30%&quot;, &quot;30-60%&quot;, &quot;60-90%&quot;, &quot;&gt;90%&quot;]
+rr[&quot;categoria_deuda&quot;] = pd.Categorical(rr[&quot;categoria_deuda&quot;], categories=orden, ordered=True)
+
+<span class="cm"># 1. Cada país-año pesa lo mismo</span>
+print(&quot;Media y mediana con todos los país-año:&quot;)
+print(rr.groupby(&quot;categoria_deuda&quot;, observed=True)[&quot;crecimiento_pib_real_pct&quot;].agg([&quot;mean&quot;, &quot;median&quot;, &quot;count&quot;]).round(2))
+
+<span class="cm"># 2. Cada país pesa lo mismo (promedio de promedios), como hicieron Reinhart y Rogoff</span>
+def promedio_por_pais(df):
+    por_pais = df.groupby([&quot;categoria_deuda&quot;, &quot;pais&quot;], observed=True)[&quot;crecimiento_pib_real_pct&quot;].mean()
+    return por_pais.groupby(level=&quot;categoria_deuda&quot;, observed=True).mean()
+
+excluidos = [&quot;Australia&quot;, &quot;Austria&quot;, &quot;Belgium&quot;, &quot;Canada&quot;, &quot;Denmark&quot;]
+tabla = pd.DataFrame({
+    &quot;pais_anio&quot;: rr.groupby(&quot;categoria_deuda&quot;, observed=True)[&quot;crecimiento_pib_real_pct&quot;].mean(),
+    &quot;promedio_por_pais&quot;: promedio_por_pais(rr),
+    &quot;con_error_excel&quot;: promedio_por_pais(rr[~rr[&quot;pais&quot;].isin(excluidos)]),
+}).round(2)
+print(&quot;\nTres formas de promediar el crecimiento (%):&quot;)
+print(tabla)
+print(&quot;Reinhart y Rogoff publicaron -0,1 % para &gt;90%. Además del error de Excel, excluyeron años de Nueva Zelanda, Australia y Canadá.&quot;)
+
+<span class="cm"># 3. Atípicos en la categoría &gt;90%</span>
+alta = rr[rr[&quot;categoria_deuda&quot;] == &quot;&gt;90%&quot;]
+print(&quot;\nAños que aporta cada país a la categoría &gt;90%:&quot;)
+print(alta[&quot;pais&quot;].value_counts())
+paises = alta[&quot;pais&quot;].value_counts().index.tolist()
+plt.figure(figsize=(9, 5))
+plt.boxplot([alta.loc[alta[&quot;pais&quot;] == p, &quot;crecimiento_pib_real_pct&quot;] for p in paises], tick_labels=paises)
+plt.axhline(0, color=&quot;gray&quot;, linewidth=0.8)
+plt.ylabel(&quot;Crecimiento del PIB real (%)&quot;)
+plt.title(&quot;Países con deuda &gt; 90 % del PIB&quot;)
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+
+<span class="cm"># Para pensar: En la versión publicada, Nueva Zelanda aportaba un solo año a la categoría &gt;90% (1951, con crecimiento de −7,6 %) y el Reino Unido aportaba 19. Con promedios por país, ese único año pesa lo mismo que los 19 británicos. ¿Es justo? ¿Qué pregunta responde cada forma de promediar?</span>
+</code></pre></div>
+    </div>
+  </div>
+</article>
+<article class="caso" id="madoff" data-temas="t2">
+  <header>
+    <p class="exp">Expediente 03 · Nueva York, 1990–2008</p>
+    <h2>Demasiado estable para ser real</h2>
+    <p class="sub">2.2 desviación estándar y coeficiente de variación · 2.3 atípicos</p>
+  </header>
+  <div class="cols">
+    <div class="relato">
+      <p>Fairfield Sentry era el mayor fondo que entregaba dinero a Bernard Madoff. Reportaba cerca de 1 % de rentabilidad cada mes, casi sin meses negativos, durante 18 años. Harry Markopolos le escribió a la SEC desde 2000 que esos números eran imposibles para la estrategia que Madoff decía usar, y en 2005 tituló su memo «The World&#x27;s Largest Hedge Fund is a Fraud». Nadie le hizo caso hasta que el fraude se derrumbó en diciembre de 2008, con pérdidas de unos 65.000 millones de dólares en papel.</p>
+      <p class="leccion"><b>Lo que enseña.</b> El dato raro no siempre es un valor extremo. A veces lo anómalo es una dispersión demasiado baja frente a la de un mercado real.</p>
+      <div class="pensar"><h3>Para pensar</h3><p>La hoja informativa del fondo dice «solo 13 meses con pérdida». Cuenta tú los meses negativos en la tabla. ¿Coinciden? ¿Qué te dice eso de confiar en el resumen sin mirar los datos?</p></div>
+    </div>
+    <div class="trabajo">
+      <h3>Datos</h3>
+      
+<details class="ficha">
+  <summary><span class="file"><code>datos/madoff_fairfield_sentry_mensual.csv</code></span><span class="meta">215 meses · 4 KB</span></summary>
+  <div class="ficha-body">
+    <h4>Rendimientos mensuales de Fairfield Sentry (fondo de Madoff) y del S&amp;P 500</h4>
+    <dl>
+      <div><dt>Periodo</dt><dd>Diciembre de 1990 – octubre de 2008</dd></div>
+      <div><dt>Fuente</dt><dd>Hoja informativa de Fairfield Sentry Ltd. publicada por NPB New Private Bank, 17 de noviembre de 2008 (tabla transcrita). S&amp;P 500: datos mensuales de Robert Shiller. <a href="https://www.finanzwesir.com/assets/files/FairfieldSentryLtd.pdf" target="_blank" rel="noopener">Ver original</a></dd></div>
+      <div><dt>Licencia</dt><dd>Documento comercial público; uso educativo con cita</dd></div>
+    </dl>
+    <div class="tw"><table><thead><tr><th>Columna</th><th>Qué es</th><th>Escala</th></tr></thead><tbody><tr><td><code>mes</code></td><td>Año-mes (AAAA-MM)</td><td class='esc'>Intervalo</td></tr><tr><td><code>rend_fairfield_pct</code></td><td>Rendimiento mensual reportado por el fondo (%)</td><td class='esc'>Intervalo</td></tr><tr><td><code>rend_sp500_pct</code></td><td>Variación mensual del precio promedio del S&amp;P 500 (%), sin dividendos</td><td class='esc'>Intervalo</td></tr></tbody></table></div>
+    <p class='adv'><b>Ojo con los datos.</b> Los rendimientos del fondo son los que el fondo declaraba, no rendimientos reales: eran inventados. El S&amp;P 500 usa promedios mensuales de precios de cierre (serie de Shiller), por eso sus caídas extremas se ven algo suavizadas.</p>
+    <a class="abrir" href="datos/madoff_fairfield_sentry_mensual.csv" target="_blank" rel="noopener">Abrir el CSV</a>
+  </div>
+</details>
+      <h3>Script</h3>
+      <div class="codigo" data-lang="r">
+        <div class="cbar"><code>scripts/r/03_madoff.R</code><span><a href="https://github.com/setase-24/Sebastian_Tabares/blob/main/estadistica_fce/scripts/r/03_madoff.R" target="_blank" rel="noopener">Ver en GitHub</a><button type="button" class="copiar">Copiar</button></span></div>
+        <pre><code><span class="cm"># Expediente 03: Demasiado estable para ser real</span>
+<span class="cm"># Nueva York, 1990–2008</span>
+<span class="cm"># Temas: 2.2 desviación estándar y coeficiente de variación · 2.3 atípicos</span>
+<span class="cm">#</span>
+<span class="cm"># Material de apoyo de Probabilidad y Estadística Fundamental (FCE).</span>
+<span class="cm"># Autor: Sebastián Tabares</span>
+<span class="cm"># Datos: madoff_fairfield_sentry_mensual.csv</span>
+<span class="cm"># Paquetes: install.packages(c(&quot;dplyr&quot;, &quot;ggplot2&quot;))</span>
+
+library(dplyr)
+library(ggplot2)
+
+URL_DATOS &lt;- &quot;https://raw.githubusercontent.com/setase-24/Sebastian_Tabares/main/estadistica_fce/datos/&quot;
+
+<span class="cm"># Lee el CSV desde la carpeta datos/ si existe; si no, lo descarga de GitHub.</span>
+leer &lt;- function(archivo) {
+  for (ruta in c(&quot;datos&quot;, &quot;../datos&quot;, &quot;../../datos&quot;)) {
+    f &lt;- file.path(ruta, archivo)
+    if (file.exists(f)) return(read.csv(f))
+  }
+  read.csv(paste0(URL_DATOS, archivo))
+}
+
+m &lt;- leer(&quot;madoff_fairfield_sentry_mensual.csv&quot;)
+
+<span class="cm"># 1. Resumen de cada serie</span>
+resumen &lt;- function(x) c(media = mean(x), mediana = median(x), desv_est = sd(x),
+                         coef_variacion = sd(x) / mean(x), meses_negativos = sum(x &lt; 0),
+                         minimo = min(x), maximo = max(x))
+print(round(cbind(Fairfield = resumen(m$rend_fairfield_pct), SP500 = resumen(m$rend_sp500_pct)), 2))
+cat(&quot;\nLa hoja del fondo decía &#x27;solo 13 meses con pérdida&#x27;. En la tabla hay&quot;,
+    sum(m$rend_fairfield_pct &lt; 0), &quot;\n&quot;)
+
+<span class="cm"># 2. Histogramas con la misma escala y valor acumulado de 100 dólares</span>
+largo &lt;- rbind(data.frame(serie = &quot;Fairfield (Madoff)&quot;, r = m$rend_fairfield_pct),
+               data.frame(serie = &quot;S&amp;P 500&quot;, r = m$rend_sp500_pct))
+print(ggplot(largo, aes(r, fill = serie)) + geom_histogram(binwidth = 1) +
+        facet_wrap(~serie) + scale_fill_manual(values = c(&quot;#1d5c4a&quot;, &quot;#a3392c&quot;)) +
+        labs(x = &quot;Rendimiento mensual (%)&quot;, y = &quot;Meses&quot;) + theme_minimal() + theme(legend.position = &quot;none&quot;))
+
+m &lt;- m |&gt; mutate(fecha = as.Date(paste0(mes, &quot;-01&quot;)),
+                 Fairfield = 100 * cumprod(1 + rend_fairfield_pct / 100),
+                 SP500 = 100 * cumprod(1 + rend_sp500_pct / 100))
+print(ggplot(m, aes(fecha)) + geom_line(aes(y = Fairfield, color = &quot;Fairfield (Madoff)&quot;)) +
+        geom_line(aes(y = SP500, color = &quot;S&amp;P 500&quot;)) +
+        scale_color_manual(values = c(&quot;#1d5c4a&quot;, &quot;#a3392c&quot;)) +
+        labs(x = NULL, y = &quot;Valor de 100 dólares&quot;, color = NULL, title = &quot;Demasiado estable para ser real&quot;) +
+        theme_minimal())
+
+<span class="cm"># 3. Correlación con el mercado</span>
+cat(sprintf(&quot;Correlación Fairfield vs S&amp;P 500: %.2f\n&quot;, cor(m$rend_fairfield_pct, m$rend_sp500_pct)))
+
+<span class="cm"># Para pensar: La hoja informativa del fondo dice «solo 13 meses con pérdida». Cuenta tú los meses negativos en la tabla. ¿Coinciden? ¿Qué te dice eso de confiar en el resumen sin mirar los datos?</span>
+</code></pre></div><div class="codigo" data-lang="py" hidden>
+        <div class="cbar"><code>scripts/python/03_madoff.py</code><span><a href="https://github.com/setase-24/Sebastian_Tabares/blob/main/estadistica_fce/scripts/python/03_madoff.py" target="_blank" rel="noopener">Ver en GitHub</a><button type="button" class="copiar">Copiar</button></span></div>
+        <pre><code>&quot;&quot;&quot;
+Expediente 03: Demasiado estable para ser real
+Nueva York, 1990–2008
+Temas: 2.2 desviación estándar y coeficiente de variación · 2.3 atípicos
+
+Material de apoyo de Probabilidad y Estadística Fundamental (FCE).
+Autor: Sebastián Tabares
+Datos: madoff_fairfield_sentry_mensual.csv
+&quot;&quot;&quot;
+import os
+import pandas as pd
+
+URL_DATOS = &quot;https://raw.githubusercontent.com/setase-24/Sebastian_Tabares/main/estadistica_fce/datos/&quot;
+
+def leer(archivo):
+    &quot;&quot;&quot;Lee el CSV desde la carpeta datos/ si existe; si no, lo descarga de GitHub.&quot;&quot;&quot;
+    for ruta in (&quot;datos&quot;, &quot;../datos&quot;, &quot;../../datos&quot;):
+        if os.path.exists(os.path.join(ruta, archivo)):
+            return pd.read_csv(os.path.join(ruta, archivo))
+    return pd.read_csv(URL_DATOS + archivo)
+
+import matplotlib.pyplot as plt
+
+m = leer(&quot;madoff_fairfield_sentry_mensual.csv&quot;)
+
+<span class="cm"># 1. Resumen de cada serie</span>
+def resumen(x):
+    return pd.Series({
+        &quot;media&quot;: x.mean(), &quot;mediana&quot;: x.median(), &quot;desv_est&quot;: x.std(),
+        &quot;coef_variacion&quot;: x.std() / x.mean(), &quot;meses_negativos&quot;: (x &lt; 0).sum(),
+        &quot;minimo&quot;: x.min(), &quot;maximo&quot;: x.max(),
+    })
+
+tabla = pd.DataFrame({&quot;Fairfield (Madoff)&quot;: resumen(m[&quot;rend_fairfield_pct&quot;]),
+                      &quot;S&amp;P 500&quot;: resumen(m[&quot;rend_sp500_pct&quot;])}).round(2)
+print(tabla)
+print(f&quot;\nLa hoja del fondo decía &#x27;solo 13 meses con pérdida&#x27;. En la tabla hay {(m[&#x27;rend_fairfield_pct&#x27;] &lt; 0).sum()}.&quot;)
+
+<span class="cm"># 2. Histogramas con la misma escala y valor acumulado de 100 dólares</span>
+fig, ejes = plt.subplots(1, 2, figsize=(11, 4), sharex=True)
+bins = range(-21, 13)
+ejes[0].hist(m[&quot;rend_fairfield_pct&quot;], bins=bins, color=&quot;#1d5c4a&quot;)
+ejes[0].set_title(&quot;Fairfield Sentry (Madoff)&quot;)
+ejes[1].hist(m[&quot;rend_sp500_pct&quot;], bins=bins, color=&quot;#a3392c&quot;)
+ejes[1].set_title(&quot;S&amp;P 500&quot;)
+for e in ejes:
+    e.set_xlabel(&quot;Rendimiento mensual (%)&quot;)
+plt.tight_layout()
+plt.show()
+
+m[&quot;fecha&quot;] = pd.to_datetime(m[&quot;mes&quot;])
+plt.figure(figsize=(9, 4))
+plt.plot(m[&quot;fecha&quot;], 100 * (1 + m[&quot;rend_fairfield_pct&quot;] / 100).cumprod(), label=&quot;Fairfield (Madoff)&quot;)
+plt.plot(m[&quot;fecha&quot;], 100 * (1 + m[&quot;rend_sp500_pct&quot;] / 100).cumprod(), label=&quot;S&amp;P 500&quot;)
+plt.ylabel(&quot;Valor de 100 dólares&quot;)
+plt.legend()
+plt.title(&quot;Demasiado estable para ser real&quot;)
+plt.tight_layout()
+plt.show()
+
+<span class="cm"># 3. Correlación con el mercado</span>
+r = m[&quot;rend_fairfield_pct&quot;].corr(m[&quot;rend_sp500_pct&quot;])
+print(f&quot;Correlación Fairfield vs S&amp;P 500: {r:.2f}&quot;)
+
+<span class="cm"># Para pensar: La hoja informativa del fondo dice «solo 13 meses con pérdida». Cuenta tú los meses negativos en la tabla. ¿Coinciden? ¿Qué te dice eso de confiar en el resumen sin mirar los datos?</span>
+</code></pre></div>
+    </div>
+  </div>
+</article>
+<article class="caso" id="benford" data-temas="t2 t1">
+  <header>
+    <p class="exp">Expediente 04 · Unión Europea, 1999–2009</p>
+    <h2>La ley del primer dígito y las cuentas de Grecia</h2>
+    <p class="sub">2.1 tablas de frecuencia y diagramas de barras · 1.2 tipo de variable</p>
+  </header>
+  <div class="cols">
+    <div class="relato">
+      <p>En cifras reales de contabilidad y finanzas públicas, el primer dígito no es uniforme: el 1 aparece cerca del 30 % de las veces y el 9 menos del 5 %. Es la ley de Benford. En 2011 Rauch, Göttsche, Brähler y Engel compararon las cifras fiscales que cada país de la UE envió a Eurostat entre 1999 y 2009: Grecia fue el país que más se alejaba de Benford. Para entonces ya había admitido que había maquillado su déficit para entrar al euro. Los auditores forenses usan esta prueba de forma rutinaria.</p>
+      <p class="leccion"><b>Lo que enseña.</b> Una tabla de frecuencias de nueve filas puede funcionar como alarma de fraude. Ojo: estos datos son la versión actual de Eurostat, ya corregida después de 2010, así que el resultado de 2011 puede no repetirse. Eso también es una lección.</p>
+      <div class="pensar"><h3>Para pensar</h3><p>¿En qué posición quedó Grecia con los datos corregidos? Si un país corrige sus cifras después de un escándalo, ¿qué esperarías que le pase a su ajuste con Benford?</p></div>
+    </div>
+    <div class="trabajo">
+      <h3>Datos</h3>
+      
+<details class="ficha">
+  <summary><span class="file"><code>datos/eurostat_finanzas_publicas_1999_2009.csv</code></span><span class="meta">28.431 cifras · 629 KB</span></summary>
+  <div class="ficha-body">
+    <h4>Finanzas públicas de 30 países europeos (gov_10a_main)</h4>
+    <dl>
+      <div><dt>Periodo</dt><dd>1999–2009</dd></div>
+      <div><dt>Fuente</dt><dd>Eurostat, tabla gov_10a_main, sector gobierno general (S13), millones de euros. <a href="https://ec.europa.eu/eurostat/databrowser/view/gov_10a_main/default/table" target="_blank" rel="noopener">Ver original</a></dd></div>
+      <div><dt>Licencia</dt><dd>Reutilización permitida citando a Eurostat</dd></div>
+    </dl>
+    <div class="tw"><table><thead><tr><th>Columna</th><th>Qué es</th><th>Escala</th></tr></thead><tbody><tr><td><code>na_item</code></td><td>Código de la partida fiscal (ingresos, gastos, déficit, etc.)</td><td class='esc'>Nominal</td></tr><tr><td><code>geo</code></td><td>Código de país (EL = Grecia)</td><td class='esc'>Nominal</td></tr><tr><td><code>year</code></td><td>Año</td><td class='esc'>Intervalo</td></tr><tr><td><code>value</code></td><td>Valor en millones de euros</td><td class='esc'>Razón (puede ser negativo en saldos)</td></tr><tr><td><code>flag</code></td><td>Marca de Eurostat (p = provisional, e = estimado, etc.)</td><td class='esc'>Nominal</td></tr></tbody></table></div>
+    <p class='adv'><b>Ojo con los datos.</b> Es la versión vigente, descargada en octubre de 2026. Las cifras de Grecia se revisaron después de 2010, así que no es la misma versión que usaron Rauch y coautores en 2011. Excluye agregados (UE, zona euro).</p>
+    <a class="abrir" href="datos/eurostat_finanzas_publicas_1999_2009.csv" target="_blank" rel="noopener">Abrir el CSV</a>
+  </div>
+</details>
+      <h3>Script</h3>
+      <div class="codigo" data-lang="r">
+        <div class="cbar"><code>scripts/r/04_benford.R</code><span><a href="https://github.com/setase-24/Sebastian_Tabares/blob/main/estadistica_fce/scripts/r/04_benford.R" target="_blank" rel="noopener">Ver en GitHub</a><button type="button" class="copiar">Copiar</button></span></div>
+        <pre><code><span class="cm"># Expediente 04: La ley del primer dígito y las cuentas de Grecia</span>
+<span class="cm"># Unión Europea, 1999–2009</span>
+<span class="cm"># Temas: 2.1 tablas de frecuencia y diagramas de barras · 1.2 tipo de variable</span>
+<span class="cm">#</span>
+<span class="cm"># Material de apoyo de Probabilidad y Estadística Fundamental (FCE).</span>
+<span class="cm"># Autor: Sebastián Tabares</span>
+<span class="cm"># Datos: eurostat_finanzas_publicas_1999_2009.csv</span>
+<span class="cm"># Paquetes: install.packages(c(&quot;dplyr&quot;, &quot;ggplot2&quot;))</span>
+
+library(dplyr)
+library(ggplot2)
+
+URL_DATOS &lt;- &quot;https://raw.githubusercontent.com/setase-24/Sebastian_Tabares/main/estadistica_fce/datos/&quot;
+
+<span class="cm"># Lee el CSV desde la carpeta datos/ si existe; si no, lo descarga de GitHub.</span>
+leer &lt;- function(archivo) {
+  for (ruta in c(&quot;datos&quot;, &quot;../datos&quot;, &quot;../../datos&quot;)) {
+    f &lt;- file.path(ruta, archivo)
+    if (file.exists(f)) return(read.csv(f))
+  }
+  read.csv(paste0(URL_DATOS, archivo))
+}
+
+eu &lt;- leer(&quot;eurostat_finanzas_publicas_1999_2009.csv&quot;)
+
+<span class="cm"># 1. Primer dígito de cada cifra</span>
+eu &lt;- eu |&gt; filter(abs(value) &gt;= 1) |&gt;
+  mutate(digito = as.integer(substr(gsub(&quot;^[0.]+&quot;, &quot;&quot;, format(abs(value), scientific = FALSE, trim = TRUE)), 1, 1)))
+benford &lt;- log10(1 + 1 / (1:9))
+frec &lt;- prop.table(table(factor(eu$digito, levels = 1:9)))
+print(round(data.frame(digito = 1:9, observado = as.numeric(frec), benford = benford), 3))
+
+<span class="cm"># 2. Desviación absoluta media (MAD) por país</span>
+ranking &lt;- eu |&gt; group_by(geo) |&gt;
+  summarise(MAD = mean(abs(as.numeric(prop.table(table(factor(digito, levels = 1:9)))) - benford))) |&gt;
+  arrange(desc(MAD))
+cat(&quot;\nPaíses más alejados de Benford (MAD):\n&quot;)
+print(head(ranking, 10))
+cat(&quot;Grecia (EL) queda en el puesto&quot;, which(ranking$geo == &quot;EL&quot;), &quot;de&quot;, nrow(ranking), &quot;\n&quot;)
+
+grecia &lt;- eu |&gt; filter(geo == &quot;EL&quot;) |&gt; count(digito) |&gt; mutate(frecuencia = n / sum(n))
+g &lt;- ggplot(grecia, aes(digito, frecuencia)) +
+  geom_col(fill = &quot;#1d5c4a&quot;) +
+  geom_point(data = data.frame(digito = 1:9, frecuencia = benford), color = &quot;#a3392c&quot;, size = 3) +
+  geom_line(data = data.frame(digito = 1:9, frecuencia = benford), color = &quot;#a3392c&quot;) +
+  scale_x_continuous(breaks = 1:9) +
+  labs(x = &quot;Primer dígito&quot;, y = &quot;Frecuencia relativa&quot;,
+       title = &quot;Cifras fiscales de Grecia 1999-2009 (barras) frente a Benford (puntos)&quot;) +
+  theme_minimal()
+print(g)
+
+<span class="cm"># Para pensar: ¿En qué posición quedó Grecia con los datos corregidos? Si un país corrige sus cifras después de un escándalo, ¿qué esperarías que le pase a su ajuste con Benford?</span>
+</code></pre></div><div class="codigo" data-lang="py" hidden>
+        <div class="cbar"><code>scripts/python/04_benford.py</code><span><a href="https://github.com/setase-24/Sebastian_Tabares/blob/main/estadistica_fce/scripts/python/04_benford.py" target="_blank" rel="noopener">Ver en GitHub</a><button type="button" class="copiar">Copiar</button></span></div>
+        <pre><code>&quot;&quot;&quot;
+Expediente 04: La ley del primer dígito y las cuentas de Grecia
+Unión Europea, 1999–2009
+Temas: 2.1 tablas de frecuencia y diagramas de barras · 1.2 tipo de variable
+
+Material de apoyo de Probabilidad y Estadística Fundamental (FCE).
+Autor: Sebastián Tabares
+Datos: eurostat_finanzas_publicas_1999_2009.csv
+&quot;&quot;&quot;
+import os
+import pandas as pd
+
+URL_DATOS = &quot;https://raw.githubusercontent.com/setase-24/Sebastian_Tabares/main/estadistica_fce/datos/&quot;
+
+def leer(archivo):
+    &quot;&quot;&quot;Lee el CSV desde la carpeta datos/ si existe; si no, lo descarga de GitHub.&quot;&quot;&quot;
+    for ruta in (&quot;datos&quot;, &quot;../datos&quot;, &quot;../../datos&quot;):
+        if os.path.exists(os.path.join(ruta, archivo)):
+            return pd.read_csv(os.path.join(ruta, archivo))
+    return pd.read_csv(URL_DATOS + archivo)
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+eu = leer(&quot;eurostat_finanzas_publicas_1999_2009.csv&quot;)
+
+<span class="cm"># 1. Primer dígito de cada cifra</span>
+eu = eu[eu[&quot;value&quot;].abs() &gt;= 1].copy()
+eu[&quot;digito&quot;] = eu[&quot;value&quot;].abs().astype(str).str.lstrip(&quot;0.&quot;).str[0].astype(int)
+benford = pd.Series(np.log10(1 + 1 / np.arange(1, 10)), index=range(1, 10))
+
+frec = eu[&quot;digito&quot;].value_counts(normalize=True).sort_index()
+print(pd.DataFrame({&quot;observado&quot;: frec, &quot;benford&quot;: benford}).round(3))
+
+<span class="cm"># 2. Desviación absoluta media (MAD) por país</span>
+def mad(df):
+    f = df[&quot;digito&quot;].value_counts(normalize=True).reindex(range(1, 10), fill_value=0)
+    return (f - benford).abs().mean()
+
+ranking = eu.groupby(&quot;geo&quot;).apply(mad, include_groups=False).sort_values(ascending=False)
+print(&quot;\nPaíses más alejados de Benford (MAD):&quot;)
+print(ranking.round(4).head(10))
+print(f&quot;Grecia (EL) queda en el puesto {list(ranking.index).index(&#x27;EL&#x27;) + 1} de {len(ranking)}&quot;)
+
+grecia = eu[eu[&quot;geo&quot;] == &quot;EL&quot;][&quot;digito&quot;].value_counts(normalize=True).sort_index()
+plt.figure(figsize=(7, 4))
+plt.bar(grecia.index, grecia.values, color=&quot;#1d5c4a&quot;, label=&quot;Grecia&quot;)
+plt.plot(benford.index, benford.values, &quot;o-&quot;, color=&quot;#a3392c&quot;, label=&quot;Ley de Benford&quot;)
+plt.xticks(range(1, 10))
+plt.xlabel(&quot;Primer dígito&quot;)
+plt.ylabel(&quot;Frecuencia relativa&quot;)
+plt.legend()
+plt.title(&quot;Cifras fiscales de Grecia 1999-2009 frente a Benford&quot;)
+plt.tight_layout()
+plt.show()
+
+<span class="cm"># Para pensar: ¿En qué posición quedó Grecia con los datos corregidos? Si un país corrige sus cifras después de un escándalo, ¿qué esperarías que le pase a su ajuste con Benford?</span>
+</code></pre></div>
+    </div>
+  </div>
+</article>
+<article class="caso" id="london-whale" data-temas="t2">
+  <header>
+    <p class="exp">Expediente 05 · JPMorgan Chase, 2012</p>
+    <h2>La ballena de Londres y una fórmula mal copiada</h2>
+    <p class="sub">2.2 dispersión y medidas de riesgo · percentiles</p>
+  </header>
+  <div class="cols">
+    <div class="relato">
+      <p>Una mesa de derivados de JPMorgan en Londres perdió unos 6.200 millones de dólares. El informe interno del banco encontró que el nuevo modelo de Value at Risk (VaR) se armaba en hojas de Excel con datos copiados y pegados a mano. En un paso, una fórmula dividía por la suma de dos tasas en lugar de por su promedio. Eso reducía la volatilidad calculada más o menos a la mitad, y el riesgo parecía menor de lo que era.</p>
+      <p class="leccion"><b>Lo que enseña.</b> La desviación estándar es la medida de riesgo más usada en finanzas. Un error de un factor 2 en ella cambia decisiones de miles de millones. Los datos de JPMorgan no son públicos; aquí se reproduce el mismo error con datos reales del mercado.</p>
+      <div class="pensar"><h3>Para pensar</h3><p>Si el VaR dice «95 % de los meses perderás menos de X», ¿cuántos meses de cada 100 esperarías que se pase? ¿Qué te dice que en 2008 se haya pasado muchas más veces?</p></div>
+    </div>
+    <div class="trabajo">
+      <h3>Datos</h3>
+      
+<details class="ficha">
+  <summary><span class="file"><code>datos/sp500_shiller_mensual.csv</code></span><span class="meta">1.869 meses · 135 KB</span></summary>
+  <div class="ficha-body">
+    <h4>S&amp;P 500 mensual desde 1871 (serie de Robert Shiller)</h4>
+    <dl>
+      <div><dt>Periodo</dt><dd>Enero de 1871 – septiembre de 2026</dd></div>
+      <div><dt>Fuente</dt><dd>Robert Shiller, Irrational Exuberance; copia mantenida por el proyecto datasets/s-and-p-500 en GitHub. <a href="https://github.com/datasets/s-and-p-500" target="_blank" rel="noopener">Ver original</a></dd></div>
+      <div><dt>Licencia</dt><dd>Datos públicos (ODC-PDDL)</dd></div>
+    </dl>
+    <div class="tw"><table><thead><tr><th>Columna</th><th>Qué es</th><th>Escala</th></tr></thead><tbody><tr><td><code>fecha</code></td><td>Primer día del mes</td><td class='esc'>Intervalo</td></tr><tr><td><code>sp500</code></td><td>Nivel del índice (promedio mensual)</td><td class='esc'>Razón</td></tr><tr><td><code>dividendo</code></td><td>Dividendo anualizado</td><td class='esc'>Razón</td></tr><tr><td><code>utilidades</code></td><td>Utilidades anualizadas</td><td class='esc'>Razón</td></tr><tr><td><code>ipc</code></td><td>Índice de precios al consumidor</td><td class='esc'>Razón</td></tr><tr><td><code>tasa_largo_plazo</code></td><td>Tasa de bonos a 10 años (%)</td><td class='esc'>Razón</td></tr><tr><td><code>precio_real</code></td><td>Precio en dólares constantes</td><td class='esc'>Razón</td></tr><tr><td><code>pe10</code></td><td>Relación precio/utilidad a 10 años (CAPE)</td><td class='esc'>Razón</td></tr><tr><td><code>rend_mensual_pct</code></td><td>Variación mensual del índice (%)</td><td class='esc'>Intervalo</td></tr></tbody></table></div>
+    <p class='adv'><b>Ojo con los datos.</b> Las últimas filas pueden tener utilidades y dividendos vacíos o estimados.</p>
+    <a class="abrir" href="datos/sp500_shiller_mensual.csv" target="_blank" rel="noopener">Abrir el CSV</a>
+  </div>
+</details>
+      <h3>Script</h3>
+      <div class="codigo" data-lang="r">
+        <div class="cbar"><code>scripts/r/05_london_whale.R</code><span><a href="https://github.com/setase-24/Sebastian_Tabares/blob/main/estadistica_fce/scripts/r/05_london_whale.R" target="_blank" rel="noopener">Ver en GitHub</a><button type="button" class="copiar">Copiar</button></span></div>
+        <pre><code><span class="cm"># Expediente 05: La ballena de Londres y una fórmula mal copiada</span>
+<span class="cm"># JPMorgan Chase, 2012</span>
+<span class="cm"># Temas: 2.2 dispersión y medidas de riesgo · percentiles</span>
+<span class="cm">#</span>
+<span class="cm"># Material de apoyo de Probabilidad y Estadística Fundamental (FCE).</span>
+<span class="cm"># Autor: Sebastián Tabares</span>
+<span class="cm"># Datos: sp500_shiller_mensual.csv</span>
+<span class="cm"># Paquetes: install.packages(c(&quot;dplyr&quot;, &quot;ggplot2&quot;))</span>
+
+library(dplyr)
+library(ggplot2)
+
+URL_DATOS &lt;- &quot;https://raw.githubusercontent.com/setase-24/Sebastian_Tabares/main/estadistica_fce/datos/&quot;
+
+<span class="cm"># Lee el CSV desde la carpeta datos/ si existe; si no, lo descarga de GitHub.</span>
+leer &lt;- function(archivo) {
+  for (ruta in c(&quot;datos&quot;, &quot;../datos&quot;, &quot;../../datos&quot;)) {
+    f &lt;- file.path(ruta, archivo)
+    if (file.exists(f)) return(read.csv(f))
+  }
+  read.csv(paste0(URL_DATOS, archivo))
+}
+
+sp &lt;- leer(&quot;sp500_shiller_mensual.csv&quot;) |&gt; mutate(fecha = as.Date(fecha))
+datos &lt;- sp |&gt; filter(fecha &gt;= as.Date(&quot;1990-01-01&quot;), fecha &lt;= as.Date(&quot;2007-12-31&quot;)) |&gt; pull(rend_mensual_pct)
+
+<span class="cm"># 1. Desviación estándar y VaR histórico al 95 %</span>
+media &lt;- mean(datos); desv &lt;- sd(datos)
+cat(sprintf(&quot;Media mensual: %.2f %%   Desviación estándar: %.2f %%\n&quot;, media, desv))
+cat(sprintf(&quot;VaR histórico 95 %% (percentil 5): %.2f %%\n&quot;, quantile(datos, 0.05)))
+
+<span class="cm"># 2. El error de JPMorgan: dividir por la suma en vez del promedio deja la volatilidad a la mitad</span>
+var_bien &lt;- media - 1.645 * desv
+var_mal  &lt;- media - 1.645 * desv / 2
+cat(sprintf(&quot;VaR paramétrico con la volatilidad correcta: %.2f %%\n&quot;, var_bien))
+cat(sprintf(&quot;VaR paramétrico con el error:                %.2f %%\n&quot;, var_mal))
+
+crisis &lt;- sp |&gt; filter(fecha &gt;= as.Date(&quot;2008-01-01&quot;), fecha &lt;= as.Date(&quot;2009-12-31&quot;))
+cat(&quot;\nMeses de 2008-2009:&quot;, nrow(crisis), &quot;\n&quot;)
+cat(&quot;Meses peores que el VaR correcto:&quot;, sum(crisis$rend_mensual_pct &lt; var_bien), &quot;\n&quot;)
+cat(&quot;Meses peores que el VaR con error:&quot;, sum(crisis$rend_mensual_pct &lt; var_mal), &quot;\n&quot;)
+cat(&quot;Si el VaR al 95 % estuviera bien calibrado, se esperaría superarlo en 1 de cada 20 meses.\n&quot;)
+
+g &lt;- ggplot(crisis, aes(fecha, rend_mensual_pct)) +
+  geom_col(fill = &quot;#1d5c4a&quot;) +
+  geom_hline(aes(yintercept = var_bien, linetype = &quot;VaR correcto&quot;)) +
+  geom_hline(aes(yintercept = var_mal, linetype = &quot;VaR con el error&quot;), color = &quot;#a3392c&quot;) +
+  labs(x = NULL, y = &quot;Rendimiento mensual (%)&quot;, linetype = NULL,
+       title = &quot;S&amp;P 500 en 2008-2009 frente al VaR estimado con 1990-2007&quot;) +
+  theme_minimal()
+print(g)
+
+<span class="cm"># Para pensar: Si el VaR dice «95 % de los meses perderás menos de X», ¿cuántos meses de cada 100 esperarías que se pase? ¿Qué te dice que en 2008 se haya pasado muchas más veces?</span>
+</code></pre></div><div class="codigo" data-lang="py" hidden>
+        <div class="cbar"><code>scripts/python/05_london_whale.py</code><span><a href="https://github.com/setase-24/Sebastian_Tabares/blob/main/estadistica_fce/scripts/python/05_london_whale.py" target="_blank" rel="noopener">Ver en GitHub</a><button type="button" class="copiar">Copiar</button></span></div>
+        <pre><code>&quot;&quot;&quot;
+Expediente 05: La ballena de Londres y una fórmula mal copiada
+JPMorgan Chase, 2012
+Temas: 2.2 dispersión y medidas de riesgo · percentiles
+
+Material de apoyo de Probabilidad y Estadística Fundamental (FCE).
+Autor: Sebastián Tabares
+Datos: sp500_shiller_mensual.csv
+&quot;&quot;&quot;
+import os
+import pandas as pd
+
+URL_DATOS = &quot;https://raw.githubusercontent.com/setase-24/Sebastian_Tabares/main/estadistica_fce/datos/&quot;
+
+def leer(archivo):
+    &quot;&quot;&quot;Lee el CSV desde la carpeta datos/ si existe; si no, lo descarga de GitHub.&quot;&quot;&quot;
+    for ruta in (&quot;datos&quot;, &quot;../datos&quot;, &quot;../../datos&quot;):
+        if os.path.exists(os.path.join(ruta, archivo)):
+            return pd.read_csv(os.path.join(ruta, archivo))
+    return pd.read_csv(URL_DATOS + archivo)
+
+import matplotlib.pyplot as plt
+
+sp = leer(&quot;sp500_shiller_mensual.csv&quot;)
+sp[&quot;fecha&quot;] = pd.to_datetime(sp[&quot;fecha&quot;])
+datos = sp[(sp[&quot;fecha&quot;] &gt;= &quot;1990-01-01&quot;) &amp; (sp[&quot;fecha&quot;] &lt;= &quot;2007-12-31&quot;)][&quot;rend_mensual_pct&quot;].dropna()
+
+<span class="cm"># 1. Desviación estándar y VaR histórico al 95 %</span>
+media, desv = datos.mean(), datos.std()
+var_historico = datos.quantile(0.05)
+print(f&quot;Media mensual: {media:.2f} %   Desviación estándar: {desv:.2f} %&quot;)
+print(f&quot;VaR histórico 95 % (percentil 5): {var_historico:.2f} %&quot;)
+
+<span class="cm"># 2. El error de JPMorgan: dividir por la suma en vez del promedio deja la volatilidad a la mitad</span>
+desv_error = desv / 2
+var_bien = media - 1.645 * desv
+var_mal = media - 1.645 * desv_error
+print(f&quot;VaR paramétrico con la volatilidad correcta: {var_bien:.2f} %&quot;)
+print(f&quot;VaR paramétrico con el error:                {var_mal:.2f} %&quot;)
+
+<span class="cm"># ¿Cuántos meses de 2008-2009 la pérdida superó cada VaR?</span>
+crisis = sp[(sp[&quot;fecha&quot;] &gt;= &quot;2008-01-01&quot;) &amp; (sp[&quot;fecha&quot;] &lt;= &quot;2009-12-31&quot;)]
+print(f&quot;\nMeses de 2008-2009: {len(crisis)}&quot;)
+print(f&quot;Meses peores que el VaR correcto: {(crisis[&#x27;rend_mensual_pct&#x27;] &lt; var_bien).sum()}&quot;)
+print(f&quot;Meses peores que el VaR con error: {(crisis[&#x27;rend_mensual_pct&#x27;] &lt; var_mal).sum()}&quot;)
+print(&quot;Si el VaR al 95 % estuviera bien calibrado, se esperaría superarlo en 1 de cada 20 meses.&quot;)
+
+plt.figure(figsize=(9, 4))
+plt.bar(crisis[&quot;fecha&quot;], crisis[&quot;rend_mensual_pct&quot;], width=20, color=&quot;#1d5c4a&quot;)
+plt.axhline(var_bien, color=&quot;#1d5c4a&quot;, linestyle=&quot;--&quot;, label=&quot;VaR correcto&quot;)
+plt.axhline(var_mal, color=&quot;#a3392c&quot;, linestyle=&quot;--&quot;, label=&quot;VaR con el error&quot;)
+plt.ylabel(&quot;Rendimiento mensual (%)&quot;)
+plt.legend()
+plt.title(&quot;S&amp;P 500 en 2008-2009 frente al VaR estimado con 1990-2007&quot;)
+plt.tight_layout()
+plt.show()
+
+<span class="cm"># Para pensar: Si el VaR dice «95 % de los meses perderás menos de X», ¿cuántos meses de cada 100 esperarías que se pase? ¿Qué te dice que en 2008 se haya pasado muchas más veces?</span>
+</code></pre></div>
+    </div>
+  </div>
+</article>
+<article class="caso" id="case-shiller" data-temas="t3">
+  <header>
+    <p class="exp">Expediente 06 · Estados Unidos, 2000–2011</p>
+    <h2>Cuando todas las casas cayeron juntas</h2>
+    <p class="sub">3.2 coeficiente de correlación · correlación que cambia en el tiempo</p>
+  </header>
+  <div class="cols">
+    <div class="relato">
+      <p>Antes de 2008, Wall Street valoraba paquetes de hipotecas (CDO) con un modelo de David Li, la cópula gaussiana, que resumía en un número la correlación entre los impagos. Ese número se estimó con datos de años en que los precios de vivienda subían y cada ciudad se movía a su ritmo. Si Miami caía, Denver no tenía por qué caer. En 2007 cayeron todas al tiempo, los impagos se volvieron mucho más correlacionados de lo supuesto, y los papeles «AAA» se desplomaron. Los datos de los CDO son privados; los índices de precios por ciudad son públicos.</p>
+      <p class="leccion"><b>Lo que enseña.</b> Un coeficiente de correlación describe un periodo, no una ley fija. Con estos datos la correlación promedio entre ciudades pasa de 0,19 a 0,50 al empezar la crisis.</p>
+      <div class="pensar"><h3>Para pensar</h3><p>Si un banco diversificó comprando hipotecas en 20 ciudades porque «no están muy correlacionadas», ¿qué le pasó a esa diversificación en 2007? ¿Qué supuesto falló?</p></div>
+    </div>
+    <div class="trabajo">
+      <h3>Datos</h3>
+      
+<details class="ficha">
+  <summary><span class="file"><code>datos/case_shiller_ciudades_eeuu.csv</code></span><span class="meta">475 meses · 78 KB</span></summary>
+  <div class="ficha-body">
+    <h4>Índices de precios de vivienda S&amp;P Case-Shiller, 20 ciudades de EE. UU.</h4>
+    <dl>
+      <div><dt>Periodo</dt><dd>Enero de 1987 – julio de 2026</dd></div>
+      <div><dt>Fuente</dt><dd>S&amp;P Dow Jones Indices / Cotality, vía FRED (Banco de la Reserva Federal de St. Louis), series desestacionalizadas. <a href="https://fred.stlouisfed.org/series/SPCS20RSA" target="_blank" rel="noopener">Ver original</a></dd></div>
+      <div><dt>Licencia</dt><dd>Datos con copyright de S&amp;P; FRED permite uso educativo citando la fuente</dd></div>
+    </dl>
+    <div class="tw"><table><thead><tr><th>Columna</th><th>Qué es</th><th>Escala</th></tr></thead><tbody><tr><td><code>fecha</code></td><td>Primer día del mes</td><td class='esc'>Intervalo</td></tr><tr><td><code>compuesto_20</code></td><td>Índice compuesto de 20 ciudades (enero 2000 = 100)</td><td class='esc'>Razón</td></tr><tr><td><code>nueva_york … cleveland</code></td><td>Índice de cada ciudad (enero 2000 = 100)</td><td class='esc'>Razón</td></tr></tbody></table></div>
+    <p class='adv'><b>Ojo con los datos.</b> Algunas ciudades empiezan después de 1987 (Dallas en 2000, por ejemplo); hay celdas vacías al inicio.</p>
+    <a class="abrir" href="datos/case_shiller_ciudades_eeuu.csv" target="_blank" rel="noopener">Abrir el CSV</a>
+  </div>
+</details>
+      <h3>Script</h3>
+      <div class="codigo" data-lang="r">
+        <div class="cbar"><code>scripts/r/06_case_shiller.R</code><span><a href="https://github.com/setase-24/Sebastian_Tabares/blob/main/estadistica_fce/scripts/r/06_case_shiller.R" target="_blank" rel="noopener">Ver en GitHub</a><button type="button" class="copiar">Copiar</button></span></div>
+        <pre><code><span class="cm"># Expediente 06: Cuando todas las casas cayeron juntas</span>
+<span class="cm"># Estados Unidos, 2000–2011</span>
+<span class="cm"># Temas: 3.2 coeficiente de correlación · correlación que cambia en el tiempo</span>
+<span class="cm">#</span>
+<span class="cm"># Material de apoyo de Probabilidad y Estadística Fundamental (FCE).</span>
+<span class="cm"># Autor: Sebastián Tabares</span>
+<span class="cm"># Datos: case_shiller_ciudades_eeuu.csv</span>
+<span class="cm"># Paquetes: install.packages(c(&quot;dplyr&quot;, &quot;ggplot2&quot;))</span>
+
+library(dplyr)
+library(ggplot2)
+
+URL_DATOS &lt;- &quot;https://raw.githubusercontent.com/setase-24/Sebastian_Tabares/main/estadistica_fce/datos/&quot;
+
+<span class="cm"># Lee el CSV desde la carpeta datos/ si existe; si no, lo descarga de GitHub.</span>
+leer &lt;- function(archivo) {
+  for (ruta in c(&quot;datos&quot;, &quot;../datos&quot;, &quot;../../datos&quot;)) {
+    f &lt;- file.path(ruta, archivo)
+    if (file.exists(f)) return(read.csv(f))
+  }
+  read.csv(paste0(URL_DATOS, archivo))
+}
+
+cs &lt;- leer(&quot;case_shiller_ciudades_eeuu.csv&quot;) |&gt; mutate(fecha = as.Date(fecha)) |&gt; select(-compuesto_20)
+
+<span class="cm"># 1. Variación mensual de cada ciudad</span>
+ciudades &lt;- setdiff(names(cs), &quot;fecha&quot;)
+var &lt;- cs |&gt; mutate(across(all_of(ciudades), \(x) 100 * (x / lag(x) - 1)))
+antes  &lt;- var |&gt; filter(fecha &gt;= as.Date(&quot;2000-01-01&quot;), fecha &lt;= as.Date(&quot;2006-06-01&quot;))
+crisis &lt;- var |&gt; filter(fecha &gt;= as.Date(&quot;2006-07-01&quot;), fecha &lt;= as.Date(&quot;2011-12-01&quot;))
+m_antes  &lt;- cor(antes[ciudades],  use = &quot;pairwise.complete.obs&quot;)
+m_crisis &lt;- cor(crisis[ciudades], use = &quot;pairwise.complete.obs&quot;)
+prom &lt;- function(m) mean(m[upper.tri(m)], na.rm = TRUE)
+cat(sprintf(&quot;Correlación promedio entre ciudades, 2000 a mediados de 2006: %.2f\n&quot;, prom(m_antes)))
+cat(sprintf(&quot;Correlación promedio entre ciudades, mediados de 2006 a 2011: %.2f\n&quot;, prom(m_crisis)))
+
+<span class="cm"># 2. Mapas de calor</span>
+a_largo &lt;- function(m, periodo) {
+  data.frame(c1 = rep(rownames(m), ncol(m)), c2 = rep(colnames(m), each = nrow(m)), r = as.vector(m), periodo = periodo)
+}
+calor &lt;- rbind(a_largo(m_antes, &quot;2000 - jun 2006&quot;), a_largo(m_crisis, &quot;jul 2006 - 2011&quot;))
+print(ggplot(calor, aes(c1, c2, fill = r)) + geom_tile() + facet_wrap(~periodo) +
+        scale_fill_gradient2(low = &quot;#2b5c8a&quot;, mid = &quot;white&quot;, high = &quot;#a3392c&quot;, limits = c(-1, 1)) +
+        labs(x = NULL, y = NULL) + theme_minimal() +
+        theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 6), axis.text.y = element_text(size = 6)))
+
+<span class="cm"># 3. Miami contra Denver</span>
+md &lt;- rbind(transform(antes[c(&quot;miami&quot;, &quot;denver&quot;)], periodo = &quot;antes&quot;),
+            transform(crisis[c(&quot;miami&quot;, &quot;denver&quot;)], periodo = &quot;crisis&quot;))
+print(md |&gt; group_by(periodo) |&gt; summarise(r = cor(miami, denver, use = &quot;complete.obs&quot;)))
+g &lt;- ggplot(md, aes(denver, miami, color = periodo)) + geom_point() +
+  scale_color_manual(values = c(&quot;#1d5c4a&quot;, &quot;#a3392c&quot;)) +
+  labs(x = &quot;Denver: variación mensual (%)&quot;, y = &quot;Miami: variación mensual (%)&quot;,
+       title = &quot;Cuando todas las casas cayeron juntas&quot;) + theme_minimal()
+print(g)
+
+<span class="cm"># Para pensar: Si un banco diversificó comprando hipotecas en 20 ciudades porque «no están muy correlacionadas», ¿qué le pasó a esa diversificación en 2007? ¿Qué supuesto falló?</span>
+</code></pre></div><div class="codigo" data-lang="py" hidden>
+        <div class="cbar"><code>scripts/python/06_case_shiller.py</code><span><a href="https://github.com/setase-24/Sebastian_Tabares/blob/main/estadistica_fce/scripts/python/06_case_shiller.py" target="_blank" rel="noopener">Ver en GitHub</a><button type="button" class="copiar">Copiar</button></span></div>
+        <pre><code>&quot;&quot;&quot;
+Expediente 06: Cuando todas las casas cayeron juntas
+Estados Unidos, 2000–2011
+Temas: 3.2 coeficiente de correlación · correlación que cambia en el tiempo
+
+Material de apoyo de Probabilidad y Estadística Fundamental (FCE).
+Autor: Sebastián Tabares
+Datos: case_shiller_ciudades_eeuu.csv
+&quot;&quot;&quot;
+import os
+import pandas as pd
+
+URL_DATOS = &quot;https://raw.githubusercontent.com/setase-24/Sebastian_Tabares/main/estadistica_fce/datos/&quot;
+
+def leer(archivo):
+    &quot;&quot;&quot;Lee el CSV desde la carpeta datos/ si existe; si no, lo descarga de GitHub.&quot;&quot;&quot;
+    for ruta in (&quot;datos&quot;, &quot;../datos&quot;, &quot;../../datos&quot;):
+        if os.path.exists(os.path.join(ruta, archivo)):
+            return pd.read_csv(os.path.join(ruta, archivo))
+    return pd.read_csv(URL_DATOS + archivo)
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+cs = leer(&quot;case_shiller_ciudades_eeuu.csv&quot;)
+cs[&quot;fecha&quot;] = pd.to_datetime(cs[&quot;fecha&quot;])
+cs = cs.set_index(&quot;fecha&quot;).drop(columns=&quot;compuesto_20&quot;)
+
+<span class="cm"># 1. Variación mensual de cada ciudad</span>
+var = cs.pct_change(fill_method=None) * 100
+antes = var.loc[&quot;2000-01-01&quot;:&quot;2006-06-01&quot;].corr()
+crisis = var.loc[&quot;2006-07-01&quot;:&quot;2011-12-01&quot;].corr()
+
+def promedio_pares(m):
+    valores = m.values[np.triu_indices_from(m.values, 1)]
+    return np.nanmean(valores)
+
+print(f&quot;Correlación promedio entre ciudades, 2000 a mediados de 2006: {promedio_pares(antes):.2f}&quot;)
+print(f&quot;Correlación promedio entre ciudades, mediados de 2006 a 2011: {promedio_pares(crisis):.2f}&quot;)
+
+<span class="cm"># 2. Mapas de calor</span>
+fig, ejes = plt.subplots(1, 2, figsize=(14, 6))
+for eje, m, titulo in [(ejes[0], antes, &quot;2000 - jun 2006&quot;), (ejes[1], crisis, &quot;jul 2006 - 2011&quot;)]:
+    im = eje.imshow(m, vmin=-1, vmax=1, cmap=&quot;RdBu_r&quot;)
+    eje.set_xticks(range(len(m)), m.columns, rotation=90, fontsize=7)
+    eje.set_yticks(range(len(m)), m.columns, fontsize=7)
+    eje.set_title(titulo)
+fig.colorbar(im, ax=ejes, shrink=0.7)
+plt.show()
+
+<span class="cm"># 3. Miami contra Denver</span>
+for nombre, desde, hasta, color in [(&quot;antes&quot;, &quot;2000-01-01&quot;, &quot;2006-06-01&quot;, &quot;#1d5c4a&quot;), (&quot;crisis&quot;, &quot;2006-07-01&quot;, &quot;2011-12-01&quot;, &quot;#a3392c&quot;)]:
+    trozo = var.loc[desde:hasta, [&quot;miami&quot;, &quot;denver&quot;]].dropna()
+    plt.scatter(trozo[&quot;denver&quot;], trozo[&quot;miami&quot;], color=color, label=f&quot;{nombre}: r = {trozo[&#x27;miami&#x27;].corr(trozo[&#x27;denver&#x27;]):.2f}&quot;)
+plt.xlabel(&quot;Denver: variación mensual (%)&quot;)
+plt.ylabel(&quot;Miami: variación mensual (%)&quot;)
+plt.legend()
+plt.title(&quot;Cuando todas las casas cayeron juntas&quot;)
+plt.show()
+
+<span class="cm"># Para pensar: Si un banco diversificó comprando hipotecas en 20 ciudades porque «no están muy correlacionadas», ¿qué le pasó a esa diversificación en 2007? ¿Qué supuesto falló?</span>
+</code></pre></div>
+    </div>
+  </div>
+</article>
+<article class="caso" id="anscombe" data-temas="t3 t2">
+  <header>
+    <p class="exp">Expediente 07 · Anscombe 1973 · Matejka y Fitzmaurice 2017</p>
+    <h2>Mismos números, gráficas opuestas</h2>
+    <p class="sub">3.1 gráficos de dos variables · 3.2 correlación · 2.2 resúmenes</p>
+  </header>
+  <div class="cols">
+    <div class="relato">
+      <p>El estadístico Francis Anscombe construyó en 1973 cuatro conjuntos de 11 puntos con la misma media, la misma varianza y la misma correlación (0,82), pero con gráficas completamente distintas: una recta, una curva, un atípico que tuerce todo. En 2017 Justin Matejka y George Fitzmaurice llevaron la idea más lejos con 13 conjuntos que comparten resúmenes hasta el segundo decimal; uno de ellos dibuja un dinosaurio.</p>
+      <p class="leccion"><b>Lo que enseña.</b> Un reporte financiero con solo medias y correlaciones puede esconder cualquier cosa. Siempre se grafica antes de calcular.</p>
+      <div class="pensar"><h3>Para pensar</h3><p>Si un analista te entrega solo la tabla de resúmenes, ¿podrías saber cuál conjunto es el dinosaurio? ¿Qué le pedirías antes de creer en una correlación?</p></div>
+    </div>
+    <div class="trabajo">
+      <h3>Datos</h3>
+      
+<details class="ficha">
+  <summary><span class="file"><code>datos/anscombe_cuarteto.csv</code></span><span class="meta">44 (4 conjuntos × 11) · 1 KB</span></summary>
+  <div class="ficha-body">
+    <h4>Cuarteto de Anscombe</h4>
+    <dl>
+      <div><dt>Periodo</dt><dd>Publicado en 1973</dd></div>
+      <div><dt>Fuente</dt><dd>F. J. Anscombe (1973), Graphs in Statistical Analysis, The American Statistician; versión del paquete quartets de R vía Rdatasets. <a href="https://vincentarelbundock.github.io/Rdatasets/doc/quartets/anscombe_quartet.html" target="_blank" rel="noopener">Ver original</a></dd></div>
+      <div><dt>Licencia</dt><dd>Datos de dominio público</dd></div>
+    </dl>
+    <div class="tw"><table><thead><tr><th>Columna</th><th>Qué es</th><th>Escala</th></tr></thead><tbody><tr><td><code>conjunto</code></td><td>Nombre del conjunto: (1) Linear, (2) Nonlinear, (3) Outlier, (4) Leverage</td><td class='esc'>Nominal</td></tr><tr><td><code>x</code></td><td>Variable x</td><td class='esc'>Razón</td></tr><tr><td><code>y</code></td><td>Variable y</td><td class='esc'>Razón</td></tr></tbody></table></div>
+    
+    <a class="abrir" href="datos/anscombe_cuarteto.csv" target="_blank" rel="noopener">Abrir el CSV</a>
+  </div>
+</details>
+<details class="ficha">
+  <summary><span class="file"><code>datos/datasaurus_docena.csv</code></span><span class="meta">1.846 (13 conjuntos × 142) · 64 KB</span></summary>
+  <div class="ficha-body">
+    <h4>Docena del Datasaurus</h4>
+    <dl>
+      <div><dt>Periodo</dt><dd>Publicado en 2017</dd></div>
+      <div><dt>Fuente</dt><dd>Matejka y Fitzmaurice (2017), Same Stats, Different Graphs, ACM CHI; vía Rdatasets. <a href="https://vincentarelbundock.github.io/Rdatasets/doc/quartets/datasaurus_dozen.html" target="_blank" rel="noopener">Ver original</a></dd></div>
+      <div><dt>Licencia</dt><dd>MIT (paquete datasauRus)</dd></div>
+    </dl>
+    <div class="tw"><table><thead><tr><th>Columna</th><th>Qué es</th><th>Escala</th></tr></thead><tbody><tr><td><code>conjunto</code></td><td>Nombre del conjunto (dino, star, circle, …)</td><td class='esc'>Nominal</td></tr><tr><td><code>x</code></td><td>Variable x</td><td class='esc'>Razón</td></tr><tr><td><code>y</code></td><td>Variable y</td><td class='esc'>Razón</td></tr></tbody></table></div>
+    
+    <a class="abrir" href="datos/datasaurus_docena.csv" target="_blank" rel="noopener">Abrir el CSV</a>
+  </div>
+</details>
+      <h3>Script</h3>
+      <div class="codigo" data-lang="r">
+        <div class="cbar"><code>scripts/r/07_anscombe.R</code><span><a href="https://github.com/setase-24/Sebastian_Tabares/blob/main/estadistica_fce/scripts/r/07_anscombe.R" target="_blank" rel="noopener">Ver en GitHub</a><button type="button" class="copiar">Copiar</button></span></div>
+        <pre><code><span class="cm"># Expediente 07: Mismos números, gráficas opuestas</span>
+<span class="cm"># Anscombe 1973 · Matejka y Fitzmaurice 2017</span>
+<span class="cm"># Temas: 3.1 gráficos de dos variables · 3.2 correlación · 2.2 resúmenes</span>
+<span class="cm">#</span>
+<span class="cm"># Material de apoyo de Probabilidad y Estadística Fundamental (FCE).</span>
+<span class="cm"># Autor: Sebastián Tabares</span>
+<span class="cm"># Datos: anscombe_cuarteto.csv, datasaurus_docena.csv</span>
+<span class="cm"># Paquetes: install.packages(c(&quot;dplyr&quot;, &quot;ggplot2&quot;))</span>
+
+library(dplyr)
+library(ggplot2)
+
+URL_DATOS &lt;- &quot;https://raw.githubusercontent.com/setase-24/Sebastian_Tabares/main/estadistica_fce/datos/&quot;
+
+<span class="cm"># Lee el CSV desde la carpeta datos/ si existe; si no, lo descarga de GitHub.</span>
+leer &lt;- function(archivo) {
+  for (ruta in c(&quot;datos&quot;, &quot;../datos&quot;, &quot;../../datos&quot;)) {
+    f &lt;- file.path(ruta, archivo)
+    if (file.exists(f)) return(read.csv(f))
+  }
+  read.csv(paste0(URL_DATOS, archivo))
+}
+
+an &lt;- leer(&quot;anscombe_cuarteto.csv&quot;)
+ds &lt;- leer(&quot;datasaurus_docena.csv&quot;)
+
+<span class="cm"># 1. Resúmenes por conjunto</span>
+resumen &lt;- function(df) {
+  df |&gt; group_by(conjunto) |&gt;
+    summarise(media_x = mean(x), desv_x = sd(x), media_y = mean(y), desv_y = sd(y), r = cor(x, y)) |&gt;
+    mutate(across(where(is.numeric), \(v) round(v, 2)))
+}
+cat(&quot;Cuarteto de Anscombe:\n&quot;); print(resumen(an))
+cat(&quot;\nDocena del Datasaurus:\n&quot;); print(resumen(ds), n = 13)
+
+<span class="cm"># 2. Una gráfica por conjunto, con los mismos ejes</span>
+print(ggplot(an, aes(x, y)) + geom_point(color = &quot;#1d5c4a&quot;) + facet_wrap(~conjunto) + theme_minimal())
+print(ggplot(ds, aes(x, y)) + geom_point(color = &quot;#1d5c4a&quot;, size = 0.8) + facet_wrap(~conjunto, ncol = 5) + theme_minimal())
+
+<span class="cm"># 3. Quitar el atípico del conjunto 3</span>
+c3 &lt;- an |&gt; filter(conjunto == &quot;(3) Outlier&quot;)
+sin_atipico &lt;- c3 |&gt; filter(y &lt; max(y))
+cat(sprintf(&quot;\nConjunto 3: r con atípico = %.3f, sin atípico = %.3f\n&quot;, cor(c3$x, c3$y), cor(sin_atipico$x, sin_atipico$y)))
+
+<span class="cm"># Para pensar: Si un analista te entrega solo la tabla de resúmenes, ¿podrías saber cuál conjunto es el dinosaurio? ¿Qué le pedirías antes de creer en una correlación?</span>
+</code></pre></div><div class="codigo" data-lang="py" hidden>
+        <div class="cbar"><code>scripts/python/07_anscombe.py</code><span><a href="https://github.com/setase-24/Sebastian_Tabares/blob/main/estadistica_fce/scripts/python/07_anscombe.py" target="_blank" rel="noopener">Ver en GitHub</a><button type="button" class="copiar">Copiar</button></span></div>
+        <pre><code>&quot;&quot;&quot;
+Expediente 07: Mismos números, gráficas opuestas
+Anscombe 1973 · Matejka y Fitzmaurice 2017
+Temas: 3.1 gráficos de dos variables · 3.2 correlación · 2.2 resúmenes
+
+Material de apoyo de Probabilidad y Estadística Fundamental (FCE).
+Autor: Sebastián Tabares
+Datos: anscombe_cuarteto.csv, datasaurus_docena.csv
+&quot;&quot;&quot;
+import os
+import pandas as pd
+
+URL_DATOS = &quot;https://raw.githubusercontent.com/setase-24/Sebastian_Tabares/main/estadistica_fce/datos/&quot;
+
+def leer(archivo):
+    &quot;&quot;&quot;Lee el CSV desde la carpeta datos/ si existe; si no, lo descarga de GitHub.&quot;&quot;&quot;
+    for ruta in (&quot;datos&quot;, &quot;../datos&quot;, &quot;../../datos&quot;):
+        if os.path.exists(os.path.join(ruta, archivo)):
+            return pd.read_csv(os.path.join(ruta, archivo))
+    return pd.read_csv(URL_DATOS + archivo)
+
+import matplotlib.pyplot as plt
+
+an = leer(&quot;anscombe_cuarteto.csv&quot;)
+ds = leer(&quot;datasaurus_docena.csv&quot;)
+
+<span class="cm"># 1. Resúmenes por conjunto</span>
+def resumen(df):
+    return df.groupby(&quot;conjunto&quot;).apply(lambda g: pd.Series({
+        &quot;media_x&quot;: g[&quot;x&quot;].mean(), &quot;desv_x&quot;: g[&quot;x&quot;].std(),
+        &quot;media_y&quot;: g[&quot;y&quot;].mean(), &quot;desv_y&quot;: g[&quot;y&quot;].std(),
+        &quot;r&quot;: g[&quot;x&quot;].corr(g[&quot;y&quot;]),
+    }), include_groups=False).round(2)
+
+print(&quot;Cuarteto de Anscombe:&quot;)
+print(resumen(an))
+print(&quot;\nDocena del Datasaurus:&quot;)
+print(resumen(ds))
+
+<span class="cm"># 2. Una gráfica por conjunto, con los mismos ejes</span>
+for df, columnas in [(an, 2), (ds, 5)]:
+    grupos = df[&quot;conjunto&quot;].unique()
+    filas = -(-len(grupos) // columnas)
+    fig, ejes = plt.subplots(filas, columnas, figsize=(3 * columnas, 3 * filas), sharex=True, sharey=True)
+    for eje, g in zip(ejes.flat, grupos):
+        d = df[df[&quot;conjunto&quot;] == g]
+        eje.scatter(d[&quot;x&quot;], d[&quot;y&quot;], s=10, color=&quot;#1d5c4a&quot;)
+        eje.set_title(g, fontsize=9)
+    for eje in list(ejes.flat)[len(grupos):]:
+        eje.axis(&quot;off&quot;)
+    plt.tight_layout()
+    plt.show()
+
+<span class="cm"># 3. Quitar el atípico del conjunto 3</span>
+c3 = an[an[&quot;conjunto&quot;] == &quot;(3) Outlier&quot;]
+sin_atipico = c3[c3[&quot;y&quot;] &lt; c3[&quot;y&quot;].max()]
+print(f&quot;\nConjunto 3: r con atípico = {c3[&#x27;x&#x27;].corr(c3[&#x27;y&#x27;]):.3f}, sin atípico = {sin_atipico[&#x27;x&#x27;].corr(sin_atipico[&#x27;y&#x27;]):.3f}&quot;)
+
+<span class="cm"># Para pensar: Si un analista te entrega solo la tabla de resúmenes, ¿podrías saber cuál conjunto es el dinosaurio? ¿Qué le pedirías antes de creer en una correlación?</span>
+</code></pre></div>
+    </div>
+  </div>
+</article>
+<article class="caso" id="berkeley" data-temas="t3 t4">
+  <header>
+    <p class="exp">Expediente 08 · Universidad de California, Berkeley, 1973</p>
+    <h2>¿Discriminación en las admisiones?</h2>
+    <p class="sub">3.1 tablas de contingencia · 4.5 probabilidad condicional · paradoja de Simpson</p>
+  </header>
+  <div class="cols">
+    <div class="relato">
+      <p>En 1973 Berkeley admitió al 44 % de los hombres que se postularon a posgrado y solo al 30 % de las mujeres. Parecía un caso claro de discriminación. Al desagregar por departamento, la diferencia casi desaparece, y en el departamento más grande las mujeres tenían mayor tasa de admisión. Las mujeres se postulaban más a los departamentos donde casi nadie entraba. Bickel, Hammel y O&#x27;Connell lo publicaron en Science en 1975.</p>
+      <p class="leccion"><b>Lo que enseña.</b> P(admitido | mujer) no es lo mismo que P(admitido | mujer, departamento). Un group_by de más o de menos cambia la conclusión.</p>
+      <div class="pensar"><h3>Para pensar</h3><p>¿En qué departamentos se postulaban más las mujeres, y qué tan difícil era entrar ahí? ¿Qué otra variable escondida podría cambiar una conclusión en una base de datos de crédito o de salarios?</p></div>
+    </div>
+    <div class="trabajo">
+      <h3>Datos</h3>
+      
+<details class="ficha">
+  <summary><span class="file"><code>datos/berkeley_admisiones_1973.csv</code></span><span class="meta">24 (2 resultados × 2 sexos × 6 departamentos) · 1 KB</span></summary>
+  <div class="ficha-body">
+    <h4>Admisiones a posgrado en UC Berkeley, 1973</h4>
+    <dl>
+      <div><dt>Periodo</dt><dd>Otoño de 1973</dd></div>
+      <div><dt>Fuente</dt><dd>Bickel, Hammel y O&#x27;Connell (1975), Science; conjunto UCBAdmissions incluido en R. <a href="https://vincentarelbundock.github.io/Rdatasets/doc/datasets/UCBAdmissions.html" target="_blank" rel="noopener">Ver original</a></dd></div>
+      <div><dt>Licencia</dt><dd>Datos de dominio público</dd></div>
+    </dl>
+    <div class="tw"><table><thead><tr><th>Columna</th><th>Qué es</th><th>Escala</th></tr></thead><tbody><tr><td><code>resultado</code></td><td>Admitido o Rechazado</td><td class='esc'>Nominal</td></tr><tr><td><code>sexo</code></td><td>Hombre o Mujer</td><td class='esc'>Nominal</td></tr><tr><td><code>departamento</code></td><td>Los seis departamentos más grandes, anonimizados (A–F)</td><td class='esc'>Nominal</td></tr><tr><td><code>frecuencia</code></td><td>Número de postulantes</td><td class='esc'>Razón (conteo)</td></tr></tbody></table></div>
+    <p class='adv'><b>Ojo con los datos.</b> Solo incluye los seis departamentos más grandes, no toda la universidad.</p>
+    <a class="abrir" href="datos/berkeley_admisiones_1973.csv" target="_blank" rel="noopener">Abrir el CSV</a>
+  </div>
+</details>
+      <h3>Script</h3>
+      <div class="codigo" data-lang="r">
+        <div class="cbar"><code>scripts/r/08_berkeley.R</code><span><a href="https://github.com/setase-24/Sebastian_Tabares/blob/main/estadistica_fce/scripts/r/08_berkeley.R" target="_blank" rel="noopener">Ver en GitHub</a><button type="button" class="copiar">Copiar</button></span></div>
+        <pre><code><span class="cm"># Expediente 08: ¿Discriminación en las admisiones?</span>
+<span class="cm"># Universidad de California, Berkeley, 1973</span>
+<span class="cm"># Temas: 3.1 tablas de contingencia · 4.5 probabilidad condicional · paradoja de Simpson</span>
+<span class="cm">#</span>
+<span class="cm"># Material de apoyo de Probabilidad y Estadística Fundamental (FCE).</span>
+<span class="cm"># Autor: Sebastián Tabares</span>
+<span class="cm"># Datos: berkeley_admisiones_1973.csv</span>
+<span class="cm"># Paquetes: install.packages(c(&quot;dplyr&quot;, &quot;ggplot2&quot;))</span>
+
+library(dplyr)
+library(ggplot2)
+
+URL_DATOS &lt;- &quot;https://raw.githubusercontent.com/setase-24/Sebastian_Tabares/main/estadistica_fce/datos/&quot;
+
+<span class="cm"># Lee el CSV desde la carpeta datos/ si existe; si no, lo descarga de GitHub.</span>
+leer &lt;- function(archivo) {
+  for (ruta in c(&quot;datos&quot;, &quot;../datos&quot;, &quot;../../datos&quot;)) {
+    f &lt;- file.path(ruta, archivo)
+    if (file.exists(f)) return(read.csv(f))
+  }
+  read.csv(paste0(URL_DATOS, archivo))
+}
+
+b &lt;- leer(&quot;berkeley_admisiones_1973.csv&quot;)
+
+<span class="cm"># 1. Tabla de contingencia sexo x resultado</span>
+tabla &lt;- xtabs(frecuencia ~ sexo + resultado, data = b)
+print(tabla)
+cat(&quot;\nP(admitido | sexo):\n&quot;)
+print(round(prop.table(tabla, margin = 1)[, &quot;Admitido&quot;], 3))
+
+<span class="cm"># 2. Por departamento</span>
+por_dep &lt;- b |&gt; group_by(departamento, sexo) |&gt;
+  summarise(tasa = sum(frecuencia[resultado == &quot;Admitido&quot;]) / sum(frecuencia),
+            postulantes = sum(frecuencia), .groups = &quot;drop&quot;)
+resumen &lt;- por_dep |&gt; group_by(departamento) |&gt;
+  summarise(hombre = tasa[sexo == &quot;Hombre&quot;], mujer = tasa[sexo == &quot;Mujer&quot;],
+            pct_mujeres = 100 * postulantes[sexo == &quot;Mujer&quot;] / sum(postulantes),
+            tasa_total = sum(tasa * postulantes) / sum(postulantes))
+cat(&quot;\nP(admitido | sexo, departamento):\n&quot;)
+print(resumen |&gt; mutate(across(where(is.numeric), \(x) round(x, 2))))
+
+g &lt;- ggplot(por_dep, aes(departamento, tasa, fill = sexo)) +
+  geom_col(position = &quot;dodge&quot;) +
+  scale_fill_manual(values = c(&quot;#1d5c4a&quot;, &quot;#a3392c&quot;)) +
+  labs(y = &quot;Tasa de admisión&quot;, title = &quot;Berkeley 1973: admisión por departamento&quot;) +
+  theme_minimal()
+print(g)
+
+<span class="cm"># Para pensar: ¿En qué departamentos se postulaban más las mujeres, y qué tan difícil era entrar ahí? ¿Qué otra variable escondida podría cambiar una conclusión en una base de datos de crédito o de salarios?</span>
+</code></pre></div><div class="codigo" data-lang="py" hidden>
+        <div class="cbar"><code>scripts/python/08_berkeley.py</code><span><a href="https://github.com/setase-24/Sebastian_Tabares/blob/main/estadistica_fce/scripts/python/08_berkeley.py" target="_blank" rel="noopener">Ver en GitHub</a><button type="button" class="copiar">Copiar</button></span></div>
+        <pre><code>&quot;&quot;&quot;
+Expediente 08: ¿Discriminación en las admisiones?
+Universidad de California, Berkeley, 1973
+Temas: 3.1 tablas de contingencia · 4.5 probabilidad condicional · paradoja de Simpson
+
+Material de apoyo de Probabilidad y Estadística Fundamental (FCE).
+Autor: Sebastián Tabares
+Datos: berkeley_admisiones_1973.csv
+&quot;&quot;&quot;
+import os
+import pandas as pd
+
+URL_DATOS = &quot;https://raw.githubusercontent.com/setase-24/Sebastian_Tabares/main/estadistica_fce/datos/&quot;
+
+def leer(archivo):
+    &quot;&quot;&quot;Lee el CSV desde la carpeta datos/ si existe; si no, lo descarga de GitHub.&quot;&quot;&quot;
+    for ruta in (&quot;datos&quot;, &quot;../datos&quot;, &quot;../../datos&quot;):
+        if os.path.exists(os.path.join(ruta, archivo)):
+            return pd.read_csv(os.path.join(ruta, archivo))
+    return pd.read_csv(URL_DATOS + archivo)
+
+import matplotlib.pyplot as plt
+
+b = leer(&quot;berkeley_admisiones_1973.csv&quot;)
+
+<span class="cm"># 1. Tabla de contingencia sexo x resultado</span>
+tabla = b.pivot_table(index=&quot;sexo&quot;, columns=&quot;resultado&quot;, values=&quot;frecuencia&quot;, aggfunc=&quot;sum&quot;)
+tabla[&quot;P(admitido | sexo)&quot;] = (tabla[&quot;Admitido&quot;] / tabla.sum(axis=1)).round(3)
+print(tabla)
+
+<span class="cm"># 2. Por departamento</span>
+por_dep = b.pivot_table(index=[&quot;departamento&quot;, &quot;sexo&quot;], columns=&quot;resultado&quot;, values=&quot;frecuencia&quot;, aggfunc=&quot;sum&quot;)
+por_dep[&quot;tasa&quot;] = por_dep[&quot;Admitido&quot;] / (por_dep[&quot;Admitido&quot;] + por_dep[&quot;Rechazado&quot;])
+tasas = por_dep[&quot;tasa&quot;].unstack().round(2)
+postulantes = b.groupby([&quot;departamento&quot;, &quot;sexo&quot;])[&quot;frecuencia&quot;].sum().unstack()
+tasas[&quot;% mujeres entre postulantes&quot;] = (100 * postulantes[&quot;Mujer&quot;] / postulantes.sum(axis=1)).round(0)
+tasas[&quot;tasa total del depto&quot;] = (por_dep[&quot;Admitido&quot;].groupby(level=0).sum() / postulantes.sum(axis=1)).round(2)
+print(&quot;\nP(admitido | sexo, departamento):&quot;)
+print(tasas)
+
+ax = tasas[[&quot;Hombre&quot;, &quot;Mujer&quot;]].plot(kind=&quot;bar&quot;, color=[&quot;#1d5c4a&quot;, &quot;#a3392c&quot;], figsize=(8, 4))
+ax.set_ylabel(&quot;Tasa de admisión&quot;)
+ax.set_title(&quot;Berkeley 1973: admisión por departamento&quot;)
+plt.xticks(rotation=0)
+plt.tight_layout()
+plt.show()
+
+<span class="cm"># Para pensar: ¿En qué departamentos se postulaban más las mujeres, y qué tan difícil era entrar ahí? ¿Qué otra variable escondida podría cambiar una conclusión en una base de datos de crédito o de salarios?</span>
+</code></pre></div>
+    </div>
+  </div>
+</article>
+<article class="caso" id="cash-winfall" data-temas="t4">
+  <header>
+    <p class="exp">Expediente 09 · Massachusetts, 2005–2012</p>
+    <h2>La lotería que sí se podía ganar</h2>
+    <p class="sub">4.4 reglas de conteo · 4.2 probabilidad clásica · valor esperado</p>
+  </header>
+  <div class="cols">
+    <div class="relato">
+      <p>Cash WinFall era una lotería de 6 números entre 46. Tenía una regla de «roll-down»: si el premio mayor pasaba de 2 millones de dólares y nadie acertaba los seis, ese dinero se repartía entre quienes acertaban 3, 4 o 5. En esas semanas, el valor esperado de un tiquete de 2 dólares era mayor que 2. Un grupo de estudiantes del MIT y un jubilado de Michigan, Gerald Selbee, lo calcularon y compraron cientos de miles de tiquetes por sorteo. Ganaron millones de forma legal hasta que el juego se cerró en 2012.</p>
+      <p class="leccion"><b>Lo que enseña.</b> Contar combinaciones no es un ejercicio de tablero: es la base para saber si una apuesta, un seguro o un producto financiero tiene valor esperado positivo.</p>
+      <div class="pensar"><h3>Para pensar</h3><p>¿Por qué el estado no perdía plata aunque estos grupos ganaran? ¿Quién estaba pagando las ganancias de los grupos organizados?</p></div>
+    </div>
+    <div class="trabajo">
+      <h3>Datos</h3>
+      <p class='sin-datos'>No necesita archivo: todo se calcula con reglas de conteo.</p>
+      <h3>Script</h3>
+      <div class="codigo" data-lang="r">
+        <div class="cbar"><code>scripts/r/09_cash_winfall.R</code><span><a href="https://github.com/setase-24/Sebastian_Tabares/blob/main/estadistica_fce/scripts/r/09_cash_winfall.R" target="_blank" rel="noopener">Ver en GitHub</a><button type="button" class="copiar">Copiar</button></span></div>
+        <pre><code><span class="cm"># Expediente 09: La lotería que sí se podía ganar</span>
+<span class="cm"># Massachusetts, 2005–2012</span>
+<span class="cm"># Temas: 4.4 reglas de conteo · 4.2 probabilidad clásica · valor esperado</span>
+<span class="cm">#</span>
+<span class="cm"># Material de apoyo de Probabilidad y Estadística Fundamental (FCE).</span>
+<span class="cm"># Autor: Sebastián Tabares</span>
+<span class="cm"># Datos: no requiere archivo</span>
+<span class="cm"># Paquetes: install.packages(c(&quot;dplyr&quot;, &quot;ggplot2&quot;))</span>
+
+
+<span class="cm"># 1. Lotería 6 de 46 (Cash WinFall)</span>
+N &lt;- 46; K &lt;- 6
+total &lt;- choose(N, K)
+cat(&quot;Combinaciones posibles:&quot;, format(total, big.mark = &quot;,&quot;), &quot;\n&quot;)
+
+<span class="cm"># Probabilidad de acertar exactamente k números (hipergeométrica)</span>
+k &lt;- 0:6
+prob &lt;- dhyper(k, K, N - K, K)
+print(data.frame(aciertos = k, probabilidad = signif(prob, 4), uno_en = round(1 / prob)))
+
+<span class="cm"># 2. Baloto: verifica el formato vigente en la página oficial y cambia estos valores</span>
+numeros &lt;- 5; de_cuantos &lt;- 43; superbalotas &lt;- 16
+baloto &lt;- choose(de_cuantos, numeros) * superbalotas
+cat(&quot;\nBaloto:&quot;, format(baloto, big.mark = &quot;,&quot;), &quot;combinaciones\n&quot;)
+cat(sprintf(&quot;Es %.1f veces más difícil que Cash WinFall\n&quot;, baloto / total))
+
+<span class="cm"># 3. Valor esperado en una semana de roll-down</span>
+<span class="cm"># Supuestos del ejercicio (aproximan las reglas del juego; puedes cambiarlos):</span>
+<span class="cm"># premios fijos por nivel, más el roll-down repartido entre los niveles 5, 4 y 3.</span>
+vendidos &lt;- 1500000
+precio &lt;- 2
+p &lt;- setNames(prob, k)
+premios_fijos &lt;- c(&quot;5&quot; = 4000, &quot;4&quot; = 150, &quot;3&quot; = 5, &quot;2&quot; = 2)   # acertar 2 = un tiquete gratis
+reparto &lt;- c(&quot;5&quot; = 0.225, &quot;4&quot; = 0.225, &quot;3&quot; = 0.55)
+roll_down &lt;- 2000000
+
+ve &lt;- sum(premios_fijos * p[names(premios_fijos)])
+cat(sprintf(&quot;\nValor esperado solo con premios fijos: %.2f dólares\n&quot;, ve))
+for (nivel in names(reparto)) {
+  ganadores &lt;- vendidos * p[nivel]
+  extra &lt;- roll_down * reparto[nivel] / ganadores
+  ve &lt;- ve + p[nivel] * extra
+  cat(sprintf(&quot;Acertar %s: unos %.0f ganadores; el roll-down le suma ≈ %.0f dólares a cada uno\n&quot;, nivel, ganadores, extra))
+}
+cat(sprintf(&quot;Valor esperado de un tiquete de %d dólares en semana de roll-down: %.2f dólares\n&quot;, precio, ve))
+
+<span class="cm"># Para pensar: ¿Por qué el estado no perdía plata aunque estos grupos ganaran? ¿Quién estaba pagando las ganancias de los grupos organizados?</span>
+</code></pre></div><div class="codigo" data-lang="py" hidden>
+        <div class="cbar"><code>scripts/python/09_cash_winfall.py</code><span><a href="https://github.com/setase-24/Sebastian_Tabares/blob/main/estadistica_fce/scripts/python/09_cash_winfall.py" target="_blank" rel="noopener">Ver en GitHub</a><button type="button" class="copiar">Copiar</button></span></div>
+        <pre><code>&quot;&quot;&quot;
+Expediente 09: La lotería que sí se podía ganar
+Massachusetts, 2005–2012
+Temas: 4.4 reglas de conteo · 4.2 probabilidad clásica · valor esperado
+
+Material de apoyo de Probabilidad y Estadística Fundamental (FCE).
+Autor: Sebastián Tabares
+Datos: no requiere archivo
+&quot;&quot;&quot;
+
+from math import comb
+
+<span class="cm"># 1. Lotería 6 de 46 (Cash WinFall)</span>
+N, K = 46, 6
+total = comb(N, K)
+print(f&quot;Combinaciones posibles: {total:,}&quot;)
+
+<span class="cm"># Probabilidad de acertar exactamente k números (hipergeométrica)</span>
+prob = {k: comb(K, k) * comb(N - K, K - k) / total for k in range(K + 1)}
+for k, p in prob.items():
+    print(f&quot;Acertar {k}: {p:.8f}  (1 en {1 / p:,.0f})&quot;)
+
+<span class="cm"># 2. Baloto: verifica el formato vigente en la página oficial y cambia estos valores</span>
+numeros, de_cuantos, superbalotas = 5, 43, 16
+baloto = comb(de_cuantos, numeros) * superbalotas
+print(f&quot;\nBaloto ({numeros} de {de_cuantos} + 1 de {superbalotas}): {baloto:,} combinaciones&quot;)
+print(f&quot;Es {baloto / total:.1f} veces más difícil que Cash WinFall&quot;)
+
+<span class="cm"># 3. Valor esperado en una semana de roll-down</span>
+<span class="cm"># Supuestos del ejercicio (aproximan las reglas del juego; puedes cambiarlos):</span>
+<span class="cm"># premios fijos por nivel, más el roll-down repartido entre los niveles 5, 4 y 3.</span>
+vendidos = 1_500_000
+precio = 2
+premios_fijos = {5: 4000, 4: 150, 3: 5, 2: 2}   # acertar 2 = un tiquete gratis
+reparto = {5: 0.225, 4: 0.225, 3: 0.55}
+roll_down = 2_000_000
+
+valor_esperado = sum(premio * prob[k] for k, premio in premios_fijos.items())
+print(f&quot;\nValor esperado solo con premios fijos: {valor_esperado:.2f} dólares&quot;)
+for k, fraccion in reparto.items():
+    ganadores = vendidos * prob[k]
+    extra = roll_down * fraccion / ganadores
+    valor_esperado += prob[k] * extra
+    print(f&quot;Acertar {k}: unos {ganadores:,.0f} ganadores; el roll-down le suma ≈ {extra:,.0f} dólares a cada uno&quot;)
+print(f&quot;Valor esperado de un tiquete de {precio} dólares en semana de roll-down: {valor_esperado:.2f} dólares&quot;)
+print(&quot;Si es mayor que el precio, comprar muchísimos tiquetes da ganancia esperada positiva.&quot;)
+
+<span class="cm"># Para pensar: ¿Por qué el estado no perdía plata aunque estos grupos ganaran? ¿Quién estaba pagando las ganancias de los grupos organizados?</span>
+</code></pre></div>
+    </div>
+  </div>
+</article>
+<article class="caso" id="spam" data-temas="t4">
+  <header>
+    <p class="exp">Expediente 10 · Hewlett-Packard 1999 · Paul Graham 2002</p>
+    <h2>Bayes contra el correo basura</h2>
+    <p class="sub">4.5 probabilidad condicional · 4.6 teorema de Bayes · leyes de De Morgan</p>
+  </header>
+  <div class="cols">
+    <div class="relato">
+      <p>En 2002 el programador Paul Graham publicó «A Plan for Spam». Su idea: para cada palabra, estimar P(spam | la palabra aparece) con el teorema de Bayes a partir de correos ya clasificados, y combinar las palabras del mensaje. Con eso su bandeja quedó casi sin spam. Los filtros de Gmail y Outlook empezaron así. Estos datos son 4.601 correos reales que empleados de Hewlett-Packard clasificaron a mano en 1999.</p>
+      <p class="leccion"><b>Lo que enseña.</b> El teorema de Bayes es una línea de código que separa millones de correos al día.</p>
+      <div class="pensar"><h3>Para pensar</h3><p>Este filtro se entrenó con los correos de una sola empresa. ¿Funcionaría igual con tu correo de la universidad? ¿Qué palabras cambiarías?</p></div>
+    </div>
+    <div class="trabajo">
+      <h3>Datos</h3>
+      
+<details class="ficha">
+  <summary><span class="file"><code>datos/spambase_hp_1999.csv</code></span><span class="meta">4.601 correos · 1.1 MB</span></summary>
+  <div class="ficha-body">
+    <h4>Spambase: 4.601 correos clasificados</h4>
+    <dl>
+      <div><dt>Periodo</dt><dd>Junio–julio de 1999</dd></div>
+      <div><dt>Fuente</dt><dd>Hopkins, Reeber, Forman y Suermondt, Hewlett-Packard Labs; UCI Machine Learning Repository. <a href="https://archive.ics.uci.edu/dataset/94/spambase" target="_blank" rel="noopener">Ver original</a></dd></div>
+      <div><dt>Licencia</dt><dd>CC BY 4.0</dd></div>
+    </dl>
+    <div class="tw"><table><thead><tr><th>Columna</th><th>Qué es</th><th>Escala</th></tr></thead><tbody><tr><td><code>word_freq_*</code></td><td>48 columnas: % de palabras del correo que son esa palabra (free, money, remove, george, hp…)</td><td class='esc'>Razón</td></tr><tr><td><code>char_freq_*</code></td><td>6 columnas: % de caracteres que son ; ( [ ! $ #</td><td class='esc'>Razón</td></tr><tr><td><code>capital_run_length_average / _longest / _total</code></td><td>Longitud promedio, máxima y total de secuencias de MAYÚSCULAS</td><td class='esc'>Razón</td></tr><tr><td><code>es_spam</code></td><td>1 = spam, 0 = correo legítimo</td><td class='esc'>Nominal (binaria)</td></tr></tbody></table></div>
+    <p class='adv'><b>Ojo con los datos.</b> Los correos legítimos son de empleados de HP, por eso palabras como «george» (nombre de un empleado) y «hp» delatan que no es spam.</p>
+    <a class="abrir" href="datos/spambase_hp_1999.csv" target="_blank" rel="noopener">Abrir el CSV</a>
+  </div>
+</details>
+      <h3>Script</h3>
+      <div class="codigo" data-lang="r">
+        <div class="cbar"><code>scripts/r/10_spam.R</code><span><a href="https://github.com/setase-24/Sebastian_Tabares/blob/main/estadistica_fce/scripts/r/10_spam.R" target="_blank" rel="noopener">Ver en GitHub</a><button type="button" class="copiar">Copiar</button></span></div>
+        <pre><code><span class="cm"># Expediente 10: Bayes contra el correo basura</span>
+<span class="cm"># Hewlett-Packard 1999 · Paul Graham 2002</span>
+<span class="cm"># Temas: 4.5 probabilidad condicional · 4.6 teorema de Bayes · leyes de De Morgan</span>
+<span class="cm">#</span>
+<span class="cm"># Material de apoyo de Probabilidad y Estadística Fundamental (FCE).</span>
+<span class="cm"># Autor: Sebastián Tabares</span>
+<span class="cm"># Datos: spambase_hp_1999.csv</span>
+<span class="cm"># Paquetes: install.packages(c(&quot;dplyr&quot;, &quot;ggplot2&quot;))</span>
+
+library(dplyr)
+library(ggplot2)
+
+URL_DATOS &lt;- &quot;https://raw.githubusercontent.com/setase-24/Sebastian_Tabares/main/estadistica_fce/datos/&quot;
+
+<span class="cm"># Lee el CSV desde la carpeta datos/ si existe; si no, lo descarga de GitHub.</span>
+leer &lt;- function(archivo) {
+  for (ruta in c(&quot;datos&quot;, &quot;../datos&quot;, &quot;../../datos&quot;)) {
+    f &lt;- file.path(ruta, archivo)
+    if (file.exists(f)) return(read.csv(f))
+  }
+  read.csv(paste0(URL_DATOS, archivo))
+}
+
+s &lt;- leer(&quot;spambase_hp_1999.csv&quot;)
+
+<span class="cm"># 1. Bayes con la palabra &quot;free&quot;</span>
+spam &lt;- s$es_spam == 1
+free &lt;- s$word_freq_free &gt; 0
+p_spam &lt;- mean(spam); p_free &lt;- mean(free); p_free_dado_spam &lt;- mean(free[spam])
+cat(sprintf(&quot;P(spam) = %.3f\nP(free) = %.3f\nP(free | spam) = %.3f\n&quot;, p_spam, p_free, p_free_dado_spam))
+cat(sprintf(&quot;P(spam | free) por Bayes = %.3f\n&quot;, p_free_dado_spam * p_spam / p_free))
+cat(sprintf(&quot;P(spam | free) contando  = %.3f\n&quot;, mean(spam[free])))
+
+<span class="cm"># 2. Varias palabras</span>
+palabras &lt;- c(&quot;free&quot;, &quot;money&quot;, &quot;remove&quot;, &quot;credit&quot;, &quot;meeting&quot;, &quot;george&quot;, &quot;hp&quot;)
+tabla &lt;- do.call(rbind, lapply(palabras, function(w) {
+  tiene &lt;- s[[paste0(&quot;word_freq_&quot;, w)]] &gt; 0
+  data.frame(palabra = w, p_palabra = mean(tiene), p_spam_dado_palabra = mean(spam[tiene]))
+}))
+print(tabla |&gt; arrange(desc(p_spam_dado_palabra)) |&gt; mutate(across(where(is.numeric), \(x) round(x, 3))))
+
+<span class="cm"># 3. Leyes de De Morgan</span>
+money &lt;- s$word_freq_money &gt; 0
+forma_1 &lt;- !(free | money)
+forma_2 &lt;- !free &amp; !money
+cat(&quot;\nNOT (free OR money):       &quot;, sum(forma_1), &quot;correos\n&quot;)
+cat(&quot;(NOT free) AND (NOT money):&quot;, sum(forma_2), &quot;correos\n&quot;)
+cat(&quot;¿Son iguales?&quot;, all(forma_1 == forma_2), &quot;\n&quot;)
+
+<span class="cm"># Para pensar: Este filtro se entrenó con los correos de una sola empresa. ¿Funcionaría igual con tu correo de la universidad? ¿Qué palabras cambiarías?</span>
+</code></pre></div><div class="codigo" data-lang="py" hidden>
+        <div class="cbar"><code>scripts/python/10_spam.py</code><span><a href="https://github.com/setase-24/Sebastian_Tabares/blob/main/estadistica_fce/scripts/python/10_spam.py" target="_blank" rel="noopener">Ver en GitHub</a><button type="button" class="copiar">Copiar</button></span></div>
+        <pre><code>&quot;&quot;&quot;
+Expediente 10: Bayes contra el correo basura
+Hewlett-Packard 1999 · Paul Graham 2002
+Temas: 4.5 probabilidad condicional · 4.6 teorema de Bayes · leyes de De Morgan
+
+Material de apoyo de Probabilidad y Estadística Fundamental (FCE).
+Autor: Sebastián Tabares
+Datos: spambase_hp_1999.csv
+&quot;&quot;&quot;
+import os
+import pandas as pd
+
+URL_DATOS = &quot;https://raw.githubusercontent.com/setase-24/Sebastian_Tabares/main/estadistica_fce/datos/&quot;
+
+def leer(archivo):
+    &quot;&quot;&quot;Lee el CSV desde la carpeta datos/ si existe; si no, lo descarga de GitHub.&quot;&quot;&quot;
+    for ruta in (&quot;datos&quot;, &quot;../datos&quot;, &quot;../../datos&quot;):
+        if os.path.exists(os.path.join(ruta, archivo)):
+            return pd.read_csv(os.path.join(ruta, archivo))
+    return pd.read_csv(URL_DATOS + archivo)
+
+s = leer(&quot;spambase_hp_1999.csv&quot;)
+
+<span class="cm"># 1. Bayes con la palabra &quot;free&quot;</span>
+spam = s[&quot;es_spam&quot;] == 1
+free = s[&quot;word_freq_free&quot;] &gt; 0
+p_spam = spam.mean()
+p_free = free.mean()
+p_free_dado_spam = free[spam].mean()
+p_spam_dado_free = p_free_dado_spam * p_spam / p_free
+print(f&quot;P(spam) = {p_spam:.3f}&quot;)
+print(f&quot;P(free) = {p_free:.3f}&quot;)
+print(f&quot;P(free | spam) = {p_free_dado_spam:.3f}&quot;)
+print(f&quot;P(spam | free) por Bayes = {p_spam_dado_free:.3f}&quot;)
+print(f&quot;P(spam | free) contando  = {spam[free].mean():.3f}&quot;)
+
+<span class="cm"># 2. Varias palabras</span>
+filas = []
+for palabra in [&quot;free&quot;, &quot;money&quot;, &quot;remove&quot;, &quot;credit&quot;, &quot;meeting&quot;, &quot;george&quot;, &quot;hp&quot;]:
+    tiene = s[f&quot;word_freq_{palabra}&quot;] &gt; 0
+    filas.append({&quot;palabra&quot;: palabra, &quot;P(palabra)&quot;: tiene.mean(), &quot;P(spam | palabra)&quot;: spam[tiene].mean()})
+print()
+print(pd.DataFrame(filas).sort_values(&quot;P(spam | palabra)&quot;, ascending=False).round(3).to_string(index=False))
+
+<span class="cm"># 3. Leyes de De Morgan</span>
+money = s[&quot;word_freq_money&quot;] &gt; 0
+forma_1 = ~(free | money)
+forma_2 = ~free &amp; ~money
+print(f&quot;\nNOT (free OR money):       {forma_1.sum()} correos&quot;)
+print(f&quot;(NOT free) AND (NOT money): {forma_2.sum()} correos&quot;)
+print(&quot;¿Son iguales?&quot;, (forma_1 == forma_2).all())
+
+<span class="cm"># Para pensar: Este filtro se entrenó con los correos de una sola empresa. ¿Funcionaría igual con tu correo de la universidad? ¿Qué palabras cambiarías?</span>
+</code></pre></div>
+    </div>
+  </div>
+</article>
+<article class="caso" id="fraude-tarjetas" data-temas="t4">
+  <header>
+    <p class="exp">Expediente 11 · Tarjetahabientes europeos, septiembre de 2013</p>
+    <h2>¿Por qué el banco te bloquea compras legítimas?</h2>
+    <p class="sub">4.5 probabilidad condicional · 4.6 teorema de Bayes · tasa base</p>
+  </header>
+  <div class="cols">
+    <div class="relato">
+      <p>Un banco europeo y la Universidad Libre de Bruselas publicaron dos días de transacciones reales con tarjeta: 284.807 operaciones, de las cuales 492 fueron fraude, apenas el 0,17 %. Las columnas V1 a V28 están anonimizadas para proteger a los clientes. Cuando el fraude es así de raro, hasta un detector muy bueno genera más alarmas falsas que verdaderas. Por eso el banco te llama para confirmar compras que sí hiciste.</p>
+      <p class="leccion"><b>Lo que enseña.</b> Sin la tasa base no se puede interpretar una prueba. Pasa igual en auditoría, en pruebas médicas y en detección de lavado de activos.</p>
+      <div class="pensar"><h3>Para pensar</h3><p>Si fueras el banco, ¿qué cuesta más: una alarma falsa o un fraude no detectado? ¿Cómo cambiarías el umbral de la alerta según esa respuesta?</p></div>
+    </div>
+    <div class="trabajo">
+      <h3>Datos</h3>
+      
+<details class="ficha">
+  <summary><span class="file"><code>datos/fraude_tarjetas_muestra.csv</code></span><span class="meta">29.211 transacciones, 52 fraudes (muestra del 10 % de 284.807) · 965 KB</span></summary>
+  <div class="ficha-body">
+    <h4>Fraude con tarjeta de crédito (muestra aleatoria del 10 %)</h4>
+    <dl>
+      <div><dt>Periodo</dt><dd>Dos días de septiembre de 2013</dd></div>
+      <div><dt>Fuente</dt><dd>Worldline y Machine Learning Group de la Université Libre de Bruxelles (Dal Pozzolo et al., 2015); copia en Zenodo. <a href="https://zenodo.org/records/7395559" target="_blank" rel="noopener">Ver original</a></dd></div>
+      <div><dt>Licencia</dt><dd>CC BY 4.0 (copia de Zenodo); original en Kaggle bajo DbCL</dd></div>
+    </dl>
+    <div class="tw"><table><thead><tr><th>Columna</th><th>Qué es</th><th>Escala</th></tr></thead><tbody><tr><td><code>Time</code></td><td>Segundos desde la primera transacción del archivo</td><td class='esc'>Razón</td></tr><tr><td><code>V12, V14, V17</code></td><td>Componentes principales anonimizadas (las más relacionadas con fraude)</td><td class='esc'>Intervalo</td></tr><tr><td><code>Amount</code></td><td>Monto de la transacción en euros</td><td class='esc'>Razón</td></tr><tr><td><code>Class</code></td><td>1 = fraude, 0 = legítima</td><td class='esc'>Nominal (binaria)</td></tr></tbody></table></div>
+    <p class='adv'><b>Ojo con los datos.</b> Muestra aleatoria simple con semilla fija: conserva la tasa base. En el archivo completo hay 492 fraudes de 284.807 (0,173 %). Se dejaron solo 3 de las 28 variables V para que el archivo pese poco.</p>
+    <a class="abrir" href="datos/fraude_tarjetas_muestra.csv" target="_blank" rel="noopener">Abrir el CSV</a>
+  </div>
+</details>
+      <h3>Script</h3>
+      <div class="codigo" data-lang="r">
+        <div class="cbar"><code>scripts/r/11_fraude_tarjetas.R</code><span><a href="https://github.com/setase-24/Sebastian_Tabares/blob/main/estadistica_fce/scripts/r/11_fraude_tarjetas.R" target="_blank" rel="noopener">Ver en GitHub</a><button type="button" class="copiar">Copiar</button></span></div>
+        <pre><code><span class="cm"># Expediente 11: ¿Por qué el banco te bloquea compras legítimas?</span>
+<span class="cm"># Tarjetahabientes europeos, septiembre de 2013</span>
+<span class="cm"># Temas: 4.5 probabilidad condicional · 4.6 teorema de Bayes · tasa base</span>
+<span class="cm">#</span>
+<span class="cm"># Material de apoyo de Probabilidad y Estadística Fundamental (FCE).</span>
+<span class="cm"># Autor: Sebastián Tabares</span>
+<span class="cm"># Datos: fraude_tarjetas_muestra.csv</span>
+<span class="cm"># Paquetes: install.packages(c(&quot;dplyr&quot;, &quot;ggplot2&quot;))</span>
+
+library(dplyr)
+library(ggplot2)
+
+URL_DATOS &lt;- &quot;https://raw.githubusercontent.com/setase-24/Sebastian_Tabares/main/estadistica_fce/datos/&quot;
+
+<span class="cm"># Lee el CSV desde la carpeta datos/ si existe; si no, lo descarga de GitHub.</span>
+leer &lt;- function(archivo) {
+  for (ruta in c(&quot;datos&quot;, &quot;../datos&quot;, &quot;../../datos&quot;)) {
+    f &lt;- file.path(ruta, archivo)
+    if (file.exists(f)) return(read.csv(f))
+  }
+  read.csv(paste0(URL_DATOS, archivo))
+}
+
+f &lt;- leer(&quot;fraude_tarjetas_muestra.csv&quot;)
+fraude &lt;- f$Class == 1
+
+<span class="cm"># 1. Tasa base y montos</span>
+cat(sprintf(&quot;Transacciones: %d   Fraudes: %d   Proporción: %.4f %%\n&quot;, nrow(f), sum(fraude), 100 * mean(fraude)))
+print(f |&gt; group_by(Class) |&gt; summarise(media = mean(Amount), mediana = median(Amount), desv = sd(Amount), maximo = max(Amount)))
+
+<span class="cm"># 2. Una alerta simple: V14 &lt; -5</span>
+alerta &lt;- f$V14 &lt; -5
+sens &lt;- mean(alerta[fraude]); falsa &lt;- mean(alerta[!fraude]); p &lt;- mean(fraude)
+cat(sprintf(&quot;\nP(alerta | fraude)    = %.3f\n&quot;, sens))
+cat(sprintf(&quot;P(alerta | no fraude) = %.4f\n&quot;, falsa))
+cat(sprintf(&quot;P(fraude | alerta) por Bayes = %.3f\n&quot;, sens * p / (sens * p + falsa * (1 - p))))
+cat(sprintf(&quot;P(fraude | alerta) contando  = %.3f\n&quot;, mean(fraude[alerta])))
+
+<span class="cm"># 3. Un detector &quot;99 % / 1 %&quot; con la tasa base real</span>
+base &lt;- 0.00173; n &lt;- 100000
+fraudes &lt;- n * base
+verdaderas &lt;- 0.99 * fraudes
+falsas &lt;- 0.01 * (n - fraudes)
+cat(sprintf(&quot;\nDe %d transacciones: %.0f fraudes\n&quot;, n, fraudes))
+cat(sprintf(&quot;Alertas verdaderas: %.0f   Alertas falsas: %.0f\n&quot;, verdaderas, falsas))
+cat(sprintf(&quot;P(fraude | alerta) = %.3f\n&quot;, verdaderas / (verdaderas + falsas)))
+
+<span class="cm"># Para pensar: Si fueras el banco, ¿qué cuesta más: una alarma falsa o un fraude no detectado? ¿Cómo cambiarías el umbral de la alerta según esa respuesta?</span>
+</code></pre></div><div class="codigo" data-lang="py" hidden>
+        <div class="cbar"><code>scripts/python/11_fraude_tarjetas.py</code><span><a href="https://github.com/setase-24/Sebastian_Tabares/blob/main/estadistica_fce/scripts/python/11_fraude_tarjetas.py" target="_blank" rel="noopener">Ver en GitHub</a><button type="button" class="copiar">Copiar</button></span></div>
+        <pre><code>&quot;&quot;&quot;
+Expediente 11: ¿Por qué el banco te bloquea compras legítimas?
+Tarjetahabientes europeos, septiembre de 2013
+Temas: 4.5 probabilidad condicional · 4.6 teorema de Bayes · tasa base
+
+Material de apoyo de Probabilidad y Estadística Fundamental (FCE).
+Autor: Sebastián Tabares
+Datos: fraude_tarjetas_muestra.csv
+&quot;&quot;&quot;
+import os
+import pandas as pd
+
+URL_DATOS = &quot;https://raw.githubusercontent.com/setase-24/Sebastian_Tabares/main/estadistica_fce/datos/&quot;
+
+def leer(archivo):
+    &quot;&quot;&quot;Lee el CSV desde la carpeta datos/ si existe; si no, lo descarga de GitHub.&quot;&quot;&quot;
+    for ruta in (&quot;datos&quot;, &quot;../datos&quot;, &quot;../../datos&quot;):
+        if os.path.exists(os.path.join(ruta, archivo)):
+            return pd.read_csv(os.path.join(ruta, archivo))
+    return pd.read_csv(URL_DATOS + archivo)
+
+f = leer(&quot;fraude_tarjetas_muestra.csv&quot;)
+fraude = f[&quot;Class&quot;] == 1
+
+<span class="cm"># 1. Tasa base y montos</span>
+print(f&quot;Transacciones: {len(f):,}   Fraudes: {fraude.sum()}   Proporción: {fraude.mean():.4%}&quot;)
+print(f.groupby(&quot;Class&quot;)[&quot;Amount&quot;].agg([&quot;mean&quot;, &quot;median&quot;, &quot;std&quot;, &quot;max&quot;]).round(2))
+
+<span class="cm"># 2. Una alerta simple: V14 &lt; -5</span>
+alerta = f[&quot;V14&quot;] &lt; -5
+sens = alerta[fraude].mean()
+falsa = alerta[~fraude].mean()
+p = fraude.mean()
+ppv = sens * p / (sens * p + falsa * (1 - p))
+print(f&quot;\nP(alerta | fraude)    = {sens:.3f}&quot;)
+print(f&quot;P(alerta | no fraude) = {falsa:.4f}&quot;)
+print(f&quot;P(fraude | alerta) por Bayes = {ppv:.3f}&quot;)
+print(f&quot;P(fraude | alerta) contando  = {fraude[alerta].mean():.3f}&quot;)
+
+<span class="cm"># 3. Un detector &quot;99 % / 1 %&quot; con la tasa base real</span>
+base = 0.00173
+n = 100_000
+fraudes = n * base
+verdaderas = 0.99 * fraudes
+falsas = 0.01 * (n - fraudes)
+print(f&quot;\nDe {n:,} transacciones: {fraudes:.0f} fraudes&quot;)
+print(f&quot;Alertas verdaderas: {verdaderas:.0f}   Alertas falsas: {falsas:.0f}&quot;)
+print(f&quot;P(fraude | alerta) = {verdaderas / (verdaderas + falsas):.3f}&quot;)
+
+<span class="cm"># Para pensar: Si fueras el banco, ¿qué cuesta más: una alarma falsa o un fraude no detectado? ¿Cómo cambiarías el umbral de la alerta según esa respuesta?</span>
+</code></pre></div>
+    </div>
+  </div>
+</article>
+<article class="caso" id="credito-taiwan" data-temas="t1 t2 t4">
+  <header>
+    <p class="exp">Expediente 12 · Taiwán, abril–septiembre de 2005</p>
+    <h2>La crisis de las tarjetas en Taiwán</h2>
+    <p class="sub">1.2 clasificación de variables · 1.3 escalas · 2.1–2.3 descriptiva · 4.5 condicional · De Morgan</p>
+  </header>
+  <div class="cols">
+    <div class="relato">
+      <p>Entre 2002 y 2005 los bancos de Taiwán repartieron tarjetas de crédito y crédito rotativo a gente sin capacidad de pago. En 2005–2006 estalló la morosidad y el gobierno tuvo que intervenir. I-Cheng Yeh y Che-hui Lien publicaron en 2009 los datos de 30.000 clientes de un banco taiwanés durante esa crisis: perfil, cupo, facturas y pagos de seis meses, y si incumplieron el mes siguiente.</p>
+      <p class="leccion"><b>Lo que enseña.</b> Es una base ideal para clasificar variables antes de calcular nada: sexo es nominal, educación es ordinal, el cupo es de razón, y hay códigos que no aparecen en la documentación.</p>
+      <div class="pensar"><h3>Para pensar</h3><p>Un retraso de un mes en septiembre sube la probabilidad de incumplir de 22 % a 50 %. ¿Eso significa que el retraso causa el incumplimiento? ¿Cómo usaría un banco esa información y qué riesgos de discriminación tiene usar sexo o edad?</p></div>
+    </div>
+    <div class="trabajo">
+      <h3>Datos</h3>
+      
+<details class="ficha">
+  <summary><span class="file"><code>datos/credito_taiwan_2005.csv</code></span><span class="meta">30.000 clientes · 2.9 MB</span></summary>
+  <div class="ficha-body">
+    <h4>Impago de tarjetas de crédito en Taiwán</h4>
+    <dl>
+      <div><dt>Periodo</dt><dd>Abril–septiembre de 2005</dd></div>
+      <div><dt>Fuente</dt><dd>Yeh y Lien (2009), Expert Systems with Applications; UCI Machine Learning Repository. <a href="https://archive.ics.uci.edu/dataset/350/default+of+credit+card+clients" target="_blank" rel="noopener">Ver original</a></dd></div>
+      <div><dt>Licencia</dt><dd>CC BY 4.0</dd></div>
+    </dl>
+    <div class="tw"><table><thead><tr><th>Columna</th><th>Qué es</th><th>Escala</th></tr></thead><tbody><tr><td><code>ID</code></td><td>Identificador del cliente</td><td class='esc'>Nominal</td></tr><tr><td><code>LIMIT_BAL</code></td><td>Cupo de crédito (dólares taiwaneses)</td><td class='esc'>Razón</td></tr><tr><td><code>SEX</code></td><td>1 = hombre, 2 = mujer</td><td class='esc'>Nominal</td></tr><tr><td><code>EDUCATION</code></td><td>1 posgrado, 2 universidad, 3 secundaria, 4 otros</td><td class='esc'>Ordinal</td></tr><tr><td><code>MARRIAGE</code></td><td>1 casado, 2 soltero, 3 otros</td><td class='esc'>Nominal</td></tr><tr><td><code>AGE</code></td><td>Edad en años</td><td class='esc'>Razón</td></tr><tr><td><code>PAY_1 … PAY_6</code></td><td>Estado de pago sep. (1) a abr. (6): −2/−1/0 al día, 1–9 meses de retraso</td><td class='esc'>Ordinal</td></tr><tr><td><code>BILL_AMT1 … 6</code></td><td>Valor de la factura, sep. a abr.</td><td class='esc'>Razón</td></tr><tr><td><code>PAY_AMT1 … 6</code></td><td>Valor pagado, sep. a abr.</td><td class='esc'>Razón</td></tr><tr><td><code>incumplio_mes_siguiente</code></td><td>1 = incumplió en octubre</td><td class='esc'>Nominal (binaria)</td></tr></tbody></table></div>
+    <p class='adv'><b>Ojo con los datos.</b> EDUCATION tiene códigos 0, 5 y 6 y MARRIAGE el código 0, que no están documentados. PAY_1 se llama PAY_0 en el archivo original de UCI.</p>
+    <a class="abrir" href="datos/credito_taiwan_2005.csv" target="_blank" rel="noopener">Abrir el CSV</a>
+  </div>
+</details>
+      <h3>Script</h3>
+      <div class="codigo" data-lang="r">
+        <div class="cbar"><code>scripts/r/12_credito_taiwan.R</code><span><a href="https://github.com/setase-24/Sebastian_Tabares/blob/main/estadistica_fce/scripts/r/12_credito_taiwan.R" target="_blank" rel="noopener">Ver en GitHub</a><button type="button" class="copiar">Copiar</button></span></div>
+        <pre><code><span class="cm"># Expediente 12: La crisis de las tarjetas en Taiwán</span>
+<span class="cm"># Taiwán, abril–septiembre de 2005</span>
+<span class="cm"># Temas: 1.2 clasificación de variables · 1.3 escalas · 2.1–2.3 descriptiva · 4.5 condicional · De Morgan</span>
+<span class="cm">#</span>
+<span class="cm"># Material de apoyo de Probabilidad y Estadística Fundamental (FCE).</span>
+<span class="cm"># Autor: Sebastián Tabares</span>
+<span class="cm"># Datos: credito_taiwan_2005.csv</span>
+<span class="cm"># Paquetes: install.packages(c(&quot;dplyr&quot;, &quot;ggplot2&quot;))</span>
+
+library(dplyr)
+library(ggplot2)
+
+URL_DATOS &lt;- &quot;https://raw.githubusercontent.com/setase-24/Sebastian_Tabares/main/estadistica_fce/datos/&quot;
+
+<span class="cm"># Lee el CSV desde la carpeta datos/ si existe; si no, lo descarga de GitHub.</span>
+leer &lt;- function(archivo) {
+  for (ruta in c(&quot;datos&quot;, &quot;../datos&quot;, &quot;../../datos&quot;)) {
+    f &lt;- file.path(ruta, archivo)
+    if (file.exists(f)) return(read.csv(f))
+  }
+  read.csv(paste0(URL_DATOS, archivo))
+}
+
+cr &lt;- leer(&quot;credito_taiwan_2005.csv&quot;)
+
+<span class="cm"># 1. Clasificación de variables</span>
+clasificacion &lt;- data.frame(
+  variable = c(&quot;LIMIT_BAL&quot;, &quot;SEX&quot;, &quot;EDUCATION&quot;, &quot;MARRIAGE&quot;, &quot;AGE&quot;, &quot;PAY_1 ... PAY_6&quot;,
+               &quot;BILL_AMT1 ... 6&quot;, &quot;PAY_AMT1 ... 6&quot;, &quot;incumplio_mes_siguiente&quot;),
+  tipo = c(&quot;cuantitativa continua&quot;, &quot;cualitativa&quot;, &quot;cualitativa&quot;, &quot;cualitativa&quot;, &quot;cuantitativa discreta&quot;,
+           &quot;cualitativa&quot;, &quot;cuantitativa continua&quot;, &quot;cuantitativa continua&quot;, &quot;cualitativa&quot;),
+  escala = c(&quot;razón&quot;, &quot;nominal&quot;, &quot;ordinal&quot;, &quot;nominal&quot;, &quot;razón&quot;, &quot;ordinal&quot;,
+             &quot;razón (puede ser negativa)&quot;, &quot;razón&quot;, &quot;nominal binaria&quot;))
+print(clasificacion)
+
+<span class="cm"># 2. Códigos no documentados</span>
+cat(&quot;\nEDUCATION:\n&quot;); print(table(cr$EDUCATION))
+cat(&quot;MARRIAGE:\n&quot;);   print(table(cr$MARRIAGE))
+raros &lt;- !(cr$EDUCATION %in% 1:4) | !(cr$MARRIAGE %in% 1:3)
+cat(&quot;Clientes con algún código no documentado:&quot;, sum(raros), &quot;\n&quot;)
+cat(&quot;\nCupo (LIMIT_BAL):\n&quot;); print(summary(cr$LIMIT_BAL))
+
+<span class="cm"># 3. Probabilidades condicionales</span>
+incumple &lt;- cr$incumplio_mes_siguiente == 1
+retraso &lt;- cr$PAY_1 &gt;= 1
+cupo_bajo &lt;- cr$LIMIT_BAL &lt; 50000
+cat(sprintf(&quot;\nP(incumplir) = %.3f\n&quot;, mean(incumple)))
+cat(sprintf(&quot;P(incumplir | retraso en sept.) = %.3f\n&quot;, mean(incumple[retraso])))
+cat(sprintf(&quot;P(incumplir | retraso y cupo &lt; 50.000) = %.3f\n&quot;, mean(incumple[retraso &amp; cupo_bajo])))
+
+<span class="cm"># De Morgan: NOT (retraso OR cupo_bajo) = (NOT retraso) AND (NOT cupo_bajo)</span>
+cat(&quot;\nNOT (retraso OR cupo bajo):       &quot;, sum(!(retraso | cupo_bajo)), &quot;\n&quot;)
+cat(&quot;(NOT retraso) AND (NOT cupo bajo):&quot;, sum(!retraso &amp; !cupo_bajo), &quot;\n&quot;)
+
+<span class="cm"># Para pensar: Un retraso de un mes en septiembre sube la probabilidad de incumplir de 22 % a 50 %. ¿Eso significa que el retraso causa el incumplimiento? ¿Cómo usaría un banco esa información y qué riesgos de discriminación tiene usar sexo o edad?</span>
+</code></pre></div><div class="codigo" data-lang="py" hidden>
+        <div class="cbar"><code>scripts/python/12_credito_taiwan.py</code><span><a href="https://github.com/setase-24/Sebastian_Tabares/blob/main/estadistica_fce/scripts/python/12_credito_taiwan.py" target="_blank" rel="noopener">Ver en GitHub</a><button type="button" class="copiar">Copiar</button></span></div>
+        <pre><code>&quot;&quot;&quot;
+Expediente 12: La crisis de las tarjetas en Taiwán
+Taiwán, abril–septiembre de 2005
+Temas: 1.2 clasificación de variables · 1.3 escalas · 2.1–2.3 descriptiva · 4.5 condicional · De Morgan
+
+Material de apoyo de Probabilidad y Estadística Fundamental (FCE).
+Autor: Sebastián Tabares
+Datos: credito_taiwan_2005.csv
+&quot;&quot;&quot;
+import os
+import pandas as pd
+
+URL_DATOS = &quot;https://raw.githubusercontent.com/setase-24/Sebastian_Tabares/main/estadistica_fce/datos/&quot;
+
+def leer(archivo):
+    &quot;&quot;&quot;Lee el CSV desde la carpeta datos/ si existe; si no, lo descarga de GitHub.&quot;&quot;&quot;
+    for ruta in (&quot;datos&quot;, &quot;../datos&quot;, &quot;../../datos&quot;):
+        if os.path.exists(os.path.join(ruta, archivo)):
+            return pd.read_csv(os.path.join(ruta, archivo))
+    return pd.read_csv(URL_DATOS + archivo)
+
+c = leer(&quot;credito_taiwan_2005.csv&quot;)
+
+<span class="cm"># 1. Clasificación de variables</span>
+clasificacion = pd.DataFrame([
+    (&quot;LIMIT_BAL&quot;, &quot;cuantitativa continua&quot;, &quot;razón&quot;),
+    (&quot;SEX&quot;, &quot;cualitativa&quot;, &quot;nominal&quot;),
+    (&quot;EDUCATION&quot;, &quot;cualitativa&quot;, &quot;ordinal&quot;),
+    (&quot;MARRIAGE&quot;, &quot;cualitativa&quot;, &quot;nominal&quot;),
+    (&quot;AGE&quot;, &quot;cuantitativa discreta&quot;, &quot;razón&quot;),
+    (&quot;PAY_1 ... PAY_6&quot;, &quot;cualitativa&quot;, &quot;ordinal&quot;),
+    (&quot;BILL_AMT1 ... 6&quot;, &quot;cuantitativa continua&quot;, &quot;razón (puede ser negativa)&quot;),
+    (&quot;PAY_AMT1 ... 6&quot;, &quot;cuantitativa continua&quot;, &quot;razón&quot;),
+    (&quot;incumplio_mes_siguiente&quot;, &quot;cualitativa&quot;, &quot;nominal binaria&quot;),
+], columns=[&quot;variable&quot;, &quot;tipo&quot;, &quot;escala&quot;])
+print(clasificacion.to_string(index=False))
+
+<span class="cm"># 2. Códigos no documentados</span>
+print(&quot;\nEDUCATION:&quot;, c[&quot;EDUCATION&quot;].value_counts().sort_index().to_dict())
+print(&quot;MARRIAGE: &quot;, c[&quot;MARRIAGE&quot;].value_counts().sort_index().to_dict())
+raros = (~c[&quot;EDUCATION&quot;].isin([1, 2, 3, 4])) | (~c[&quot;MARRIAGE&quot;].isin([1, 2, 3]))
+print(f&quot;Clientes con algún código no documentado: {raros.sum()}&quot;)
+
+print(&quot;\nCupo (LIMIT_BAL):&quot;)
+print(c[&quot;LIMIT_BAL&quot;].describe().round(0))
+
+<span class="cm"># 3. Probabilidades condicionales</span>
+incumple = c[&quot;incumplio_mes_siguiente&quot;] == 1
+retraso = c[&quot;PAY_1&quot;] &gt;= 1
+cupo_bajo = c[&quot;LIMIT_BAL&quot;] &lt; 50_000
+print(f&quot;\nP(incumplir) = {incumple.mean():.3f}&quot;)
+print(f&quot;P(incumplir | retraso en sept.) = {incumple[retraso].mean():.3f}&quot;)
+print(f&quot;P(incumplir | retraso y cupo &lt; 50.000) = {incumple[retraso &amp; cupo_bajo].mean():.3f}&quot;)
+
+<span class="cm"># De Morgan: NOT (retraso OR cupo_bajo) = (NOT retraso) AND (NOT cupo_bajo)</span>
+print(f&quot;\nNOT (retraso OR cupo bajo):            {(~(retraso | cupo_bajo)).sum()}&quot;)
+print(f&quot;(NOT retraso) AND (NOT cupo bajo):     {(~retraso &amp; ~cupo_bajo).sum()}&quot;)
+
+<span class="cm"># Para pensar: Un retraso de un mes en septiembre sube la probabilidad de incumplir de 22 % a 50 %. ¿Eso significa que el retraso causa el incumplimiento? ¿Cómo usaría un banco esa información y qué riesgos de discriminación tiene usar sexo o edad?</span>
+</code></pre></div>
+    </div>
+  </div>
+</article>
+<p class="vacio" id="vacio" hidden>No hay casos con ese tema.</p>
+</main>
+
+<footer><div class="wrap">
+  <p>Preparado por Sebastián Tabares para los estudiantes de Probabilidad y Estadística Fundamental. Los datos y los scripts están en el repositorio <a href="https://github.com/setase-24/Sebastian_Tabares/tree/main/estadistica_fce" target="_blank" rel="noopener">setase-24/Sebastian_Tabares</a>.</p>
+  <p>Cada conjunto de datos tiene su ficha en <code>datos/LEEME.md</code>: de dónde salió, su licencia y qué tiene de raro. Donde los datos originales no son públicos (JPMorgan, los CDO de 2008), el caso lo dice y usa datos reales del mercado que muestran el mismo fenómeno.</p>
+</div></footer>
+
+<script>
+(function(){
+  var lang = "r";
+  try { var g = localStorage.getItem("fce-code"); if (g === "r" || g === "py") lang = g; } catch(e) {}
+  var activos = new Set();
+  function pintar(){
+    document.querySelectorAll(".codigo").forEach(function(el){ el.hidden = el.dataset.lang !== lang; });
+    document.querySelectorAll(".lang").forEach(function(b){ b.setAttribute("aria-pressed", b.dataset.lang===lang ? "true":"false"); });
+  }
+  function filtrar(){
+    var n=0;
+    document.querySelectorAll(".caso").forEach(function(c){
+      var ok = activos.size===0 || c.dataset.temas.split(" ").some(function(t){return activos.has(t);});
+      c.hidden = !ok; if(ok) n++;
+    });
+    document.getElementById("vacio").hidden = n>0;
+  }
+  document.querySelectorAll(".lang").forEach(function(b){ b.addEventListener("click", function(){
+    lang = b.dataset.lang; try{localStorage.setItem("fce-code",lang);}catch(e){} pintar(); }); });
+  document.querySelectorAll(".chip").forEach(function(b){ b.addEventListener("click", function(){
+    var t=b.dataset.t; if(activos.has(t)){activos.delete(t);b.setAttribute("aria-pressed","false");} else {activos.add(t);b.setAttribute("aria-pressed","true");} filtrar(); }); });
+  document.querySelectorAll(".copiar").forEach(function(b){ b.addEventListener("click", function(){
+    var el=b.closest(".codigo").querySelector("pre code"); var txt=el.textContent;
+    function hecho(){ b.textContent="Copiado"; b.classList.add("ok"); setTimeout(function(){b.textContent="Copiar"; b.classList.remove("ok");},1600); }
+    function sel(){ var r=document.createRange(); r.selectNodeContents(el); var s=getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent="Seleccionado"; }
+    try { navigator.clipboard.writeText(txt).then(hecho, sel); } catch(e){ sel(); }
+  }); });
+  pintar();
+})();
+</script>
+
+</body>
+</html>
